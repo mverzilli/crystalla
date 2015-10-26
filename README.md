@@ -28,6 +28,13 @@ m.print
 p "This is M's inverse (note it's inverted in place): "
 m.invert!
 m.print
+
+# => "This is how M looks now: "
+# => "| 1  3 |"
+# => "| 2  4 |"
+# => "This is M's inverse (note it's inverted in place): "
+# => "| -2  1.5 |"
+# => "| 1  -0.5 |"
 ```
 
 ## Development
