@@ -21,6 +21,7 @@ module Crystalla
           row += " #{self[i, j]} "
         end
         row += "|"
+        p row
       end
     end
 
