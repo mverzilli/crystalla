@@ -14,6 +14,16 @@ module Crystalla
       {number_of_rows, number_of_cols}
     end
 
+    def print
+      (0...m.number_of_rows).each do |i|
+        row = "|"
+        (0...m.number_of_cols).each do |j|
+          row += " #{m[i, j]} "
+        end
+        row += "|"
+      end
+    end
+
     # *Heavily inspired* by:
     # http://docs.scipy.org/doc/numpy/reference/generated/numpy.allclose.html
     def all_close(other)
