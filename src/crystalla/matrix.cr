@@ -15,10 +15,10 @@ module Crystalla
     end
 
     def print
-      (0...m.number_of_rows).each do |i|
+      (0...@number_of_rows).each do |i|
         row = "|"
-        (0...m.number_of_cols).each do |j|
-          row += " #{m[i, j]} "
+        (0...@number_of_cols).each do |j|
+          row += " #{self[i, j]} "
         end
         row += "|"
       end
