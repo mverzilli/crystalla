@@ -1,13 +1,29 @@
 require "./spec_helper"
 
 describe Crystalla::Matrix do
-  it "creates a Matrix from given columns" do
-    m = Crystalla::Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
+  context "creation" do
+    it "creates a Matrix from given columns" do
+      m = Crystalla::Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
 
-    m[0, 0].should eq(1)
-    m[0, 1].should eq(2)
-    m[1, 0].should eq(3)
-    m[1, 1].should eq(4)
+      m[0, 0].should eq(1)
+      m[0, 1].should eq(2)
+      m[1, 0].should eq(3)
+      m[1, 1].should eq(4)
+    end
+
+    it "loads from space separated file" do
+      m = Crystalla::Matrix.load "spec/housing.data"
+
+      m.number_of_rows.should eq(506)
+      m.number_of_cols.should eq(14)
+
+      m[0, 0].should eq(0.00632)
+      m[6, 0].should eq(0.08829)
+      m[15, 0].should eq(0.62739)
+      m[0, 1].should eq(18.0)
+      m[99, 2].should eq(2.890)
+      m[112, 11].should eq(394.95)
+    end
   end
 
   context "dimensions" do

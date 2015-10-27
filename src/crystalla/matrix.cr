@@ -10,6 +10,14 @@ module Crystalla
       Matrix.new columns.flatten, columns.first.size, columns.size
     end
 
+    def self.load(file)
+      rows = [] of Array(Float64)
+      File.each_line(file) do |line|
+        rows.push line.split.map(&.to_f)
+      end
+      Matrix.columns rows.transpose
+    end
+
     def dimensions
       {number_of_rows, number_of_cols}
     end
@@ -38,7 +46,7 @@ module Crystalla
     end
 
     def [](i, j)
-      @values[@number_of_cols * j + i]
+      @values[@number_of_rows * j + i]
     end
 
     def invert!
