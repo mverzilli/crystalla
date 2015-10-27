@@ -1,5 +1,5 @@
 require "./spec_helper"
-
+require "benchmark"
 describe Crystalla::Matrix do
   context "creation" do
     it "creates a Matrix from given columns" do

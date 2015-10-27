@@ -50,44 +50,42 @@ module Crystalla
     end
 
     def invert!
-      # Set the dimension of the "workspace" array WORK
-      # see http://www.netlib.org/lapack-dev/lapack-coding/program-style.html#workspace
-      # TODO: calculate the workspace size dinamically
-      lwork = 100
-      work = Array.new(lwork, 0_f32)
+      pivot_indices_array = Array.new(@number_of_rows, 0)
+      lapack_feedback = lapack_lu(pivot_indices_array)
+      raise "LU failed: code #{lapack_feedback}" if lapack_feedback != 0
+      lapack_feedback = lapack_invert(pivot_indices_array)
+      raise "sgetri_ returned an error!" if lapack_feedback != 0
+      self
+    end
 
-      # TODO: check that the assumption ipiv = rows * cols is right
-      # Pivot indices array
-      ipiv = Array.new(@number_of_rows * @number_of_cols, 0)
-
-      # Lapack error codes
+    private def lapack_lu(pivot_indices_array)
       info = 0
-
-      # Calculate LU decomposition of A (and store it in A)
       LibLapack.lu(
         pointerof(@number_of_rows),
         pointerof(@number_of_cols),
         @values.to_unsafe as Void*,
         pointerof(@number_of_rows),
-        ipiv,
+        pivot_indices_array,
         pointerof(info)
       )
+      info
+    end
 
-      raise "LU failed" if info != 0
+    private def lapack_invert(pivot_indices_array)
+      workspace_length = @number_of_rows * @number_of_cols
+      workspace = Slice.new(workspace_length, 0.0)
 
+      info = 0
       LibLapack.dgetri_(
         pointerof(@number_of_rows),
         @values.to_unsafe as Void*,
         pointerof(@number_of_rows),
-        ipiv,
-        pointerof(work) as Void*,
-        pointerof(lwork),
+        pivot_indices_array,
+        workspace.to_unsafe as Void*,
+        pointerof(workspace_length),
         pointerof(info)
       )
-
-      raise "sgetri_ returned an error!" if info != 0
-
-      self
+      info
     end
   end
 end
