@@ -36,7 +36,7 @@ describe Matrix do
       end
     end
 
-    it "creates a matriz of zeros" do
+    it "creates a matrix of zeros" do
       m = Matrix.zeros(1, 2)
       m.dimensions.should eq({1, 2})
       m[0, 0].should eq(0)
@@ -95,19 +95,19 @@ describe Matrix do
       m.should_not eq(m2)
     end
 
-    it "with similar matrixes" do
+    it "with similar matrices" do
       m = Matrix.columns [[1, 3], [2, 4]]
       m2 = Matrix.columns [[1, 3], [2, 4]]
       m.all_close(m2).should be_true
     end
 
-    it "with matrixes with different dimensions" do
+    it "with matrices with different dimensions" do
       m = Matrix.columns [[1, 3], [2, 4]]
       m2 = Matrix.columns [[1, 3], [2, 4], [3, 5]]
       m.all_close(m2).should be_false
     end
 
-    it "with matrixes with same dimensions and different values" do
+    it "with matrices with same dimensions and different values" do
       m = Matrix.columns [[1, 3], [2, 4]]
       m2 = Matrix.columns [[1, 5], [2, 4]]
       m.all_close(m2).should be_false
