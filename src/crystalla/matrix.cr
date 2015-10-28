@@ -33,13 +33,39 @@ module Crystalla
       end
     end
 
-    # *Heavily inspired* by:
-    # http://docs.scipy.org/doc/numpy/reference/generated/numpy.allclose.html
+    def prepend(row)
+      add_row(0, row)
+    end
+
+    def append(row)
+      add_row(@number_of_rows, row)
+    end
+
+    def add_row(index, row)
+      new_columns = [] of Array(Float64)
+
+      i = 0
+      @values.each_slice(@number_of_rows) do |col|
+        new_columns.push col.insert(index, row[i])
+        i += 1
+      end
+
+      Matrix.columns new_columns
+    end
+
+    def ==(other : Matrix)
+      compare(other) {|index, value| value == other.values[index]}
+    end
+
     def all_close(other)
+      compare(other) {|index, value| value.close_to(other.values[index])}
+    end
+
+    def compare(other)
       return false unless self.dimensions == other.dimensions
 
-      (0...@values.size).each do |i|
-        return false unless @values[i].close_to(other.values[i])
+      self.each do |index, value|
+        return false unless yield(index, value)
       end
 
       true
@@ -58,6 +84,13 @@ module Crystalla
       self
     end
 
+    protected def each
+      (0...@values.size).each do |i|
+        yield i, @values[i]
+      end
+    end
+
+    # LAPACK calls
     private def lapack_lu(pivot_indices_array)
       info = 0
       LibLapack.lu(
