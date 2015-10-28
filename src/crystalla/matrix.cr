@@ -1,13 +1,18 @@
 module Crystalla
   class Matrix
-    property number_of_rows
-    property number_of_cols
-    property values
+    getter number_of_rows
+    getter number_of_cols
+    getter values
 
-    protected def initialize(@values, @number_of_rows, @number_of_cols); end
+    def initialize(@values : Array(Float64), @number_of_rows : Int32, @number_of_cols : Int32); end
 
     def self.columns(columns : Array(Array(Float64)))
+      check_columns_have_same_number_of_rows columns
       Matrix.new columns.flatten, columns.first.size, columns.size
+    end
+
+    def self.columns(columns : Array(Array(Number)))
+      Matrix.columns columns.map(&.map(&.to_f))
     end
 
     def self.load(file)
@@ -15,22 +20,46 @@ module Crystalla
       File.each_line(file) do |line|
         rows.push line.split.map(&.to_f)
       end
+      Matrix.rows rows
+    end
+
+    def self.rows(rows : Array(Array(Number)))
+      check_rows_have_same_number_of_rows rows
+
       Matrix.columns rows.transpose
     end
 
-    def dimensions
-      {number_of_rows, number_of_cols}
+    def self.zeros(number_of_rows, number_of_cols)
+      if number_of_rows < 0
+        raise ArgumentError.new "negative number of rows"
+      end
+
+      if number_of_cols < 0
+        raise ArgumentError.new "negative number of columns"
+      end
+
+      Matrix.new(Array.new(number_of_rows * number_of_cols, 0.0), number_of_rows, number_of_cols)
     end
 
-    def print
-      (0...@number_of_rows).each do |i|
-        row = "|"
-        (0...@number_of_cols).each do |j|
-          row += " #{self[i, j]} "
-        end
-        row += "|"
-        p row
+    def [](i, j)
+      values[number_of_rows * j + i]
+    end
+
+    def *(other : self)
+      if number_of_cols != other.number_of_rows
+        raise ArgumentError.new "number of rows/columns mismatch in matrix multiplication"
       end
+
+      c = Matrix.zeros(number_of_rows, other.number_of_cols)
+      LibBlas.dgemm(
+        LibBlas::Order::ColMajor,                                 # order
+        LibBlas::Transpose::NoTrans, LibBlas::Transpose::NoTrans, # transa, transb
+        number_of_rows, other.number_of_cols, number_of_cols,     # m, n, k
+        1.0, self, ld,                                            # alpha, a, lda
+        other, other.ld,                                          # b, ldb
+        1.0, c, c.ld                                              # beta, c, ldc
+      )
+      c
     end
 
     def prepend(row)
@@ -54,11 +83,11 @@ module Crystalla
     end
 
     def ==(other : Matrix)
-      compare(other) {|index, value| value == other.values[index]}
+      compare(other) { |index, value| value == other.values[index] }
     end
 
     def all_close(other)
-      compare(other) {|index, value| value.close_to(other.values[index])}
+      compare(other) { |index, value| value.close_to(other.values[index]) }
     end
 
     def compare(other)
@@ -71,12 +100,20 @@ module Crystalla
       true
     end
 
-    def [](i, j)
-      @values[@number_of_rows * j + i]
+    def dimensions
+      {number_of_rows, number_of_cols}
+    end
+
+    def inspect(io)
+      to_s(io)
     end
 
     def invert!
-      pivot_indices_array = Array.new(@number_of_rows, 0)
+      unless square?
+        raise ArgumentError.new "can't invert non-square matrix"
+      end
+
+      pivot_indices_array = Slice.new(number_of_rows, 0)
       lapack_feedback = lapack_lu(pivot_indices_array)
       raise "LU failed: code #{lapack_feedback}" if lapack_feedback != 0
       lapack_feedback = lapack_invert(pivot_indices_array)
@@ -90,35 +127,83 @@ module Crystalla
       end
     end
 
-    # LAPACK calls
+    def square?
+      number_of_rows == number_of_cols
+    end
+
+    def to_s(io)
+      (0...number_of_rows).each do |i|
+        io.puts if i > 0
+        io << "|"
+        (0...number_of_cols).each do |j|
+          io << " " << self[i, j] << " "
+        end
+        io << "|"
+      end
+    end
+
     private def lapack_lu(pivot_indices_array)
       info = 0
       LibLapack.lu(
-        pointerof(@number_of_rows),
-        pointerof(@number_of_cols),
-        @values.to_unsafe as Void*,
-        pointerof(@number_of_rows),
-        pivot_indices_array,
-        pointerof(info)
+        pointerof(@number_of_rows), # m
+        pointerof(@number_of_cols), # n
+        self,                       # a
+        ld_ptr,                     # lda
+        pivot_indices_array,        # ipiv
+        pointerof(info)             # info
       )
       info
     end
 
     private def lapack_invert(pivot_indices_array)
-      workspace_length = @number_of_rows * @number_of_cols
+      workspace_length = number_of_rows * number_of_cols
       workspace = Slice.new(workspace_length, 0.0)
 
       info = 0
       LibLapack.dgetri_(
-        pointerof(@number_of_rows),
-        @values.to_unsafe as Void*,
-        pointerof(@number_of_rows),
-        pivot_indices_array,
-        workspace.to_unsafe as Void*,
-        pointerof(workspace_length),
-        pointerof(info)
+        pointerof(@number_of_rows),  # n
+        self,                        # a
+        ld_ptr,                      # lda
+        pivot_indices_array,         # ipiv
+        workspace,                   # work
+        pointerof(workspace_length), # lwork
+        pointerof(info)              # info
       )
       info
+    end
+
+    private def self.check_columns_have_same_number_of_rows(columns)
+      return if columns.empty?
+
+      number_of_rows = columns.first.size
+      columns.each_with_index do |column, i|
+        if column.size != number_of_rows
+          raise ArgumentError.new "column ##{i + 1} must have #{number_of_rows} rows, not #{column.size}"
+        end
+      end
+    end
+
+    private def self.check_rows_have_same_number_of_rows(rows)
+      return if rows.empty?
+
+      number_of_cols = rows.first.size
+      rows.each_with_index do |row, i|
+        if row.size != number_of_cols
+          raise ArgumentError.new "row ##{i + 1} must have #{number_of_cols} columns, not #{row.size}"
+        end
+      end
+    end
+
+    protected def ld
+      number_of_rows
+    end
+
+    protected def ld_ptr
+      pointerof(@number_of_rows)
+    end
+
+    def to_unsafe
+      values.to_unsafe
     end
   end
 end

@@ -1,14 +1,56 @@
 require "./spec_helper"
 require "benchmark"
+
 describe Matrix do
   context "creation" do
     it "creates a Matrix from given columns" do
-      m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
+      m = Matrix.columns [[1, 3], [2, 4]]
 
       m[0, 0].should eq(1)
       m[0, 1].should eq(2)
       m[1, 0].should eq(3)
       m[1, 1].should eq(4)
+    end
+
+    it "raises on dimension mismatch with columns" do
+      expect_raises ArgumentError, "column #2 must have 2 rows, not 3" do
+        Matrix.columns [[1, 3], [2, 4, 5]]
+      end
+    end
+
+    it "creates a Matrix from given rows" do
+      m = Matrix.rows [
+        [1, 2],
+        [3, 4],
+      ]
+
+      m[0, 0].should eq(1)
+      m[0, 1].should eq(2)
+      m[1, 0].should eq(3)
+      m[1, 1].should eq(4)
+    end
+
+    it "raises on dimension mismatch with rows" do
+      expect_raises ArgumentError, "row #2 must have 2 columns, not 3" do
+        Matrix.rows [[1, 3], [2, 4, 5]]
+      end
+    end
+
+    it "creates a matriz of zeros" do
+      m = Matrix.zeros(1, 2)
+      m.dimensions.should eq({1, 2})
+      m[0, 0].should eq(0)
+      m[0, 1].should eq(0)
+    end
+
+    it "raises if zeros gets negative rows or cols" do
+      expect_raises ArgumentError, "negative number of rows" do
+        Matrix.zeros(-1, 2)
+      end
+
+      expect_raises ArgumentError, "negative number of columns" do
+        Matrix.zeros(1, -1)
+      end
     end
 
     it "loads from space separated file" do
@@ -28,13 +70,13 @@ describe Matrix do
 
   context "dimensions" do
     it "with same number of cols and rows" do
-      m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
-      m.dimensions.should eq({2,2})
+      m = Matrix.columns [[1, 3], [2, 4]]
+      m.dimensions.should eq({2, 2})
     end
 
     it "with different number of cols and rows" do
-      m = Matrix.columns [[1.0, 3.0], [2.0, 4.0], [1.0, 3.0], [2.0, 4.0]]
-      m.dimensions.should eq({2,4})
+      m = Matrix.columns [[1, 3], [2, 4], [1, 3], [2, 4]]
+      m.dimensions.should eq({2, 4})
     end
   end
 
@@ -54,29 +96,72 @@ describe Matrix do
     end
 
     it "with similar matrixes" do
-      m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
-      m2 = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
+      m = Matrix.columns [[1, 3], [2, 4]]
+      m2 = Matrix.columns [[1, 3], [2, 4]]
       m.all_close(m2).should be_true
     end
 
     it "with matrixes with different dimensions" do
-      m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
-      m2 = Matrix.columns [[1.0, 3.0], [2.0, 4.0], [3.0, 5.0]]
+      m = Matrix.columns [[1, 3], [2, 4]]
+      m2 = Matrix.columns [[1, 3], [2, 4], [3, 5]]
       m.all_close(m2).should be_false
     end
 
     it "with matrixes with same dimensions and different values" do
-      m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
-      m2 = Matrix.columns [[1.0, 5.0], [2.0, 4.0]]
+      m = Matrix.columns [[1, 3], [2, 4]]
+      m2 = Matrix.columns [[1, 5], [2, 4]]
       m.all_close(m2).should be_false
     end
   end
 
-  it "inverts a Matrix" do
-    m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
-    inverse = Matrix.columns [[-2.0, 1.5], [1.0, -0.5]]
+  context "invert" do
+    it "inverts a Matrix" do
+      m = Matrix.columns [[1, 3], [2, 4]]
+      inverse = Matrix.columns [[-2, 1.5], [1, -0.5]]
 
-    m.invert!.all_close(inverse).should be_true
+      m.invert!.all_close(inverse).should be_true
+    end
+
+    it "raises if non-square" do
+      m = Matrix.columns [[1, 3], [2, 4], [5, 6]]
+      expect_raises ArgumentError, "can't invert non-square matrix" do
+        m.invert!
+      end
+    end
+  end
+
+  context "*" do
+    it "mutliplies two matrices" do
+      m1 = Matrix.rows [
+        [1, 2],
+        [3, 4],
+        [5, 6],
+      ]
+      m2 = Matrix.rows [
+        [7, 8, 9],
+        [10, 11, 12],
+      ]
+      expected = Matrix.rows [
+        [1*7 + 2*10, 1*8 + 2*11, 1*9 + 2*12],
+        [3*7 + 4*10, 3*8 + 4*11, 3*9 + 4*12],
+        [5*7 + 6*10, 5*8 + 6*11, 5*9 + 6*12],
+      ]
+      (m1 * m2).all_close(expected).should be_true
+    end
+
+    it "raises if rows don't match columns" do
+      m1 = Matrix.rows [
+        [1, 2],
+      ]
+      m2 = Matrix.rows [
+        [7],
+        [8],
+        [9],
+      ]
+      expect_raises ArgumentError, "number of rows/columns mismatch in matrix multiplication" do
+        m1 * m2
+      end
+    end
   end
 
   context "add rows" do
@@ -86,7 +171,7 @@ describe Matrix do
 
       new_m = m.prepend(new_row)
 
-      new_m.should eq(Matrix.columns [[1.0, 1.0, 3.0], [1.0,2.0,4.0]])
+      new_m.should eq(Matrix.columns [[1.0, 1.0, 3.0], [1.0, 2.0, 4.0]])
     end
 
     it "adds a row at the middle" do
@@ -95,7 +180,7 @@ describe Matrix do
 
       new_m = m.add_row(1, new_row)
 
-      new_m.should eq(Matrix.columns [[1.0, 1.0, 3.0], [2.0,1.0,4.0]])
+      new_m.should eq(Matrix.columns [[1.0, 1.0, 3.0], [2.0, 1.0, 4.0]])
     end
 
     it "adds a row at the bottom" do
@@ -104,7 +189,7 @@ describe Matrix do
 
       new_m = m.append(new_row)
 
-      new_m.should eq(Matrix.columns [[1.0, 3.0, 1.0], [2.0,4.0,1.0]])
+      new_m.should eq(Matrix.columns [[1.0, 3.0, 1.0], [2.0, 4.0, 1.0]])
     end
   end
 end
