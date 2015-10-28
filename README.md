@@ -37,6 +37,14 @@ m.print
 # => "| 1  -0.5 |"
 ```
 
+## Features implemented so far
+
+* Load matrices from space separated plain text files.
+* Create matrices from given their columns.
+* Add rows at an arbitrary position (non-destructive).
+* Compare two matrices value-by-value: exact match or closeness (given absolute and relative epsilon values).
+* Invert matrices (destructive).
+
 ## Development
 
 Currently it only supports development and usage on OS X. 
