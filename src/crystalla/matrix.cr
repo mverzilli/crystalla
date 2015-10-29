@@ -45,6 +45,10 @@ module Crystalla
       values[number_of_rows * j + i]
     end
 
+    def []=(i, j, x)
+      values[number_of_rows * j + i] = x
+    end
+
     def *(other : self)
       if number_of_cols != other.number_of_rows
         raise ArgumentError.new "number of rows/columns mismatch in matrix multiplication"
@@ -106,6 +110,10 @@ module Crystalla
 
     def inspect(io)
       to_s(io)
+    end
+
+    def clone
+      Matrix.new(@values.clone, @number_of_rows, @number_of_cols)
     end
 
     def invert!
