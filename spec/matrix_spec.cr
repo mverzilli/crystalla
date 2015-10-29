@@ -192,4 +192,33 @@ describe Matrix do
       new_m.should eq(Matrix.columns [[1.0, 3.0, 1.0], [2.0, 4.0, 1.0]])
     end
   end
+
+  context "clone" do
+    it "clones a matrix" do
+      m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
+      m2 = m.clone
+      m[0, 0] = 1.1
+
+      m[0, 0].should eq(1.1)
+      m2[0, 0].should eq(1.0)
+    end
+  end
+
+  context "solve" do
+    it "solves a square system for a single rhs" do
+      m = Matrix.rows [[2.0, 1.0, 3.0], [2.0, 6.0, 8.0], [6.0, 8.0, 18.0]]
+      b = Matrix.columns [[1.0, 3.0, 5.0]]
+      x = m.solve(b)
+      expected = Matrix.columns [[0.3, 0.4, 0.0]]
+      x.all_close(expected).should be_true
+    end
+
+    it "solves a square system for multiple rhss" do
+      m = Matrix.rows [[2.0, 1.0, 3.0], [2.0, 6.0, 8.0], [6.0, 8.0, 18.0]]
+      b = Matrix.columns [[1.0, 3.0, 5.0], [2.0, 6.0, 10.0]]
+      x = m.solve(b)
+      expected = Matrix.columns [[0.3, 0.4, 0.0], [0.6, 0.8, 0.0]]
+      x.all_close(expected).should be_true
+    end
+  end
 end
