@@ -129,6 +129,16 @@ module Crystalla
       self
     end
 
+    def solve(b : self)
+      raise ArgumentError.new "right hand side must have the same number of rows as left hand side"\
+        if self.number_of_rows != b.number_of_rows
+      lu = self.clone
+      x = b.clone
+      lapack_feedback = lapack_solve(lu, x)
+      raise "Solve failed: code #{lapack_feedback}" if lapack_feedback != 0
+      x
+    end
+
     protected def each
       (0...@values.size).each do |i|
         yield i, @values[i]
@@ -176,6 +186,24 @@ module Crystalla
         workspace,                   # work
         pointerof(workspace_length), # lwork
         pointerof(info)              # info
+)
+      info
+    end
+
+    private def lapack_solve(a, b)
+      info = 0
+      nhrs = b.number_of_cols
+      ldb = b.number_of_rows
+
+      LibLapack.dgesv(
+        pointerof(@number_of_rows),   # n
+        pointerof(nhrs),              # nhrs
+        a,                            # a
+        ld_ptr,                       # lda
+        Slice.new(number_of_rows, 0), # ipiv
+        b,                            # b
+        pointerof(ldb),               # ldb
+        pointerof(info)               # info
       )
       info
     end
