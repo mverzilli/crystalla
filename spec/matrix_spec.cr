@@ -84,6 +84,23 @@ describe Matrix do
       m[99, 2].should eq(2.890)
       m[112, 11].should eq(394.95)
     end
+
+    it "creates a random matrix" do
+      m = Matrix.rand(2, 3)
+      m.dimensions.should eq({2, 3})
+      m.values.each do |value|
+        (0.0 <= value <= 1.0).should be_true
+      end
+    end
+
+    it "creates a random matrix with integer values" do
+      m = Matrix.rand(2, 3, (10..20))
+      m.dimensions.should eq({2, 3})
+      m.values.each do |value|
+        (10 <= value <= 20).should be_true
+        (value - value.to_i).should be_close(0, 0.0000001)
+      end
+    end
   end
 
   context "dimensions" do
