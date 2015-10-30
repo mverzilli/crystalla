@@ -92,6 +92,17 @@ module Crystalla
       values[number_of_rows * j + i] = x
     end
 
+    def +(other : self)
+      raise ArgumentError.new "number of rows mismatch in matrix addition" if number_of_rows != other.number_of_rows
+      raise ArgumentError.new "number of columns mismatch in matrix addition" if number_of_cols != other.number_of_cols
+
+      added = Array.new(number_of_rows * number_of_cols, 0.0)
+      values.size.times do |i|
+        added[i] = values[i] + other.values[i]
+      end
+      Matrix.new(added, number_of_rows, number_of_cols)
+    end
+
     def *(other : self)
       if number_of_cols != other.number_of_rows
         raise ArgumentError.new "number of rows/columns mismatch in matrix multiplication"
