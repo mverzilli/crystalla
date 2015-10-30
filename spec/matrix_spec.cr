@@ -20,9 +20,9 @@ describe Matrix do
 
     it "creates a Matrix from given rows" do
       m = Matrix.rows [
-        [1, 2],
-        [3, 4],
-      ]
+            [1, 2],
+            [3, 4],
+          ]
 
       m[0, 0].should eq(1)
       m[0, 1].should eq(2)
@@ -41,6 +41,24 @@ describe Matrix do
       m.dimensions.should eq({1, 2})
       m[0, 0].should eq(0)
       m[0, 1].should eq(0)
+    end
+
+    it "creates a square identity matrix" do
+      m = Matrix.eye(2)
+      m.dimensions.should eq({2, 2})
+      m.should eq(Matrix.rows([[1.0, 0.0], [0.0, 1.0]]))
+    end
+
+    it "creates an identity matrix with more rows" do
+      m = Matrix.eye(3, 2)
+      m.dimensions.should eq({3, 2})
+      m.should eq(Matrix.rows([[1.0, 0.0], [0.0, 1.0], [0.0, 0.0]]))
+    end
+
+    it "creates an identity matrix with more cols" do
+      m = Matrix.eye(2, 3)
+      m.dimensions.should eq({2, 3})
+      m.should eq(Matrix.rows([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]))
     end
 
     it "raises if zeros gets negative rows or cols" do
@@ -65,6 +83,23 @@ describe Matrix do
       m[0, 1].should eq(18.0)
       m[99, 2].should eq(2.890)
       m[112, 11].should eq(394.95)
+    end
+
+    it "creates a random matrix" do
+      m = Matrix.rand(2, 3)
+      m.dimensions.should eq({2, 3})
+      m.values.each do |value|
+        (0.0 <= value <= 1.0).should be_true
+      end
+    end
+
+    it "creates a random matrix with integer values" do
+      m = Matrix.rand(2, 3, (10..20))
+      m.dimensions.should eq({2, 3})
+      m.values.each do |value|
+        (10 <= value <= 20).should be_true
+        (value - value.to_i).should be_close(0, 0.0000001)
+      end
     end
   end
 
@@ -133,14 +168,14 @@ describe Matrix do
   context "*" do
     it "mutliplies two matrices" do
       m1 = Matrix.rows [
-        [1, 2],
-        [3, 4],
-        [5, 6],
-      ]
+             [1, 2],
+             [3, 4],
+             [5, 6],
+           ]
       m2 = Matrix.rows [
-        [7, 8, 9],
-        [10, 11, 12],
-      ]
+             [7, 8, 9],
+             [10, 11, 12],
+           ]
       expected = Matrix.rows [
         [1*7 + 2*10, 1*8 + 2*11, 1*9 + 2*12],
         [3*7 + 4*10, 3*8 + 4*11, 3*9 + 4*12],
@@ -151,13 +186,13 @@ describe Matrix do
 
     it "raises if rows don't match columns" do
       m1 = Matrix.rows [
-        [1, 2],
-      ]
+             [1, 2],
+           ]
       m2 = Matrix.rows [
-        [7],
-        [8],
-        [9],
-      ]
+             [7],
+             [8],
+             [9],
+           ]
       expect_raises ArgumentError, "number of rows/columns mismatch in matrix multiplication" do
         m1 * m2
       end

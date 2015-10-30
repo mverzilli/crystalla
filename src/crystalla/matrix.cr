@@ -30,6 +30,51 @@ module Crystalla
     end
 
     def self.zeros(number_of_rows, number_of_cols)
+      validate_dimensions(number_of_rows, number_of_cols)
+
+      Matrix.new(Array.new(number_of_rows * number_of_cols, 0.0), number_of_rows, number_of_cols)
+    end
+
+    def self.rand(number_of_rows, number_of_cols)
+      validate_dimensions(number_of_rows, number_of_cols)
+
+      r = Random.new
+      values = Array.new(number_of_rows * number_of_cols, 0.0)
+      values.size.times do |i|
+        values[i] = r.next_float
+      end
+
+      Matrix.new(values, number_of_rows, number_of_cols)
+    end
+
+    def self.rand(number_of_rows, number_of_cols, range)
+      validate_dimensions(number_of_rows, number_of_cols)
+
+      r = Random.new
+      values = Array.new(number_of_rows * number_of_cols, 0.0)
+      values.size.times do |i|
+        values[i] = r.rand(range).to_f
+      end
+
+      Matrix.new(values, number_of_rows, number_of_cols)
+    end
+
+    def self.eye(number_of_rows_and_cols)
+      eye(number_of_rows_and_cols, number_of_rows_and_cols)
+    end
+
+    def self.eye(number_of_rows, number_of_cols)
+      validate_dimensions(number_of_rows, number_of_cols)
+
+      values = Array.new(number_of_rows * number_of_cols, 0.0)
+      [number_of_cols, number_of_rows].min.times do |i|
+        values[number_of_rows * i + i] = 1.0
+      end
+
+      Matrix.new(values, number_of_rows, number_of_cols)
+    end
+
+    def self.validate_dimensions(number_of_rows, number_of_cols)
       if number_of_rows < 0
         raise ArgumentError.new "negative number of rows"
       end
@@ -37,8 +82,6 @@ module Crystalla
       if number_of_cols < 0
         raise ArgumentError.new "negative number of columns"
       end
-
-      Matrix.new(Array.new(number_of_rows * number_of_cols, 0.0), number_of_rows, number_of_cols)
     end
 
     def [](i, j)
