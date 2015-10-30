@@ -1,6 +1,8 @@
 # Crystalla
 
-Crystalla is a Numerical Methods library for the Crystal programming language. It binds to LAPACK and looks to Numpy for API and design ideas. 
+[![Build Status](https://travis-ci.org/mverzilli/crystalla.svg?branch=master)](https://travis-ci.org/mverzilli/crystalla)
+
+Crystalla is a Numerical Methods library for the Crystal programming language. It binds to LAPACK and looks to Numpy for API and design ideas.
 
 It currently only works on OS X.
 
@@ -43,10 +45,11 @@ m.print
 * Add rows at an arbitrary position (non-destructive).
 * Compare two matrices value-by-value: exact match or closeness (given absolute and relative epsilon values).
 * Invert matrices (destructive).
+* Solve system of linear equations.
 
 ## Development
 
-Currently it only supports development and usage on OS X. 
+Currently it only supports development and usage on OS X.
 
 ## Contributing
 
