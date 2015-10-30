@@ -119,7 +119,7 @@ describe Matrix do
       m = Matrix.columns [[1, 3], [2, 4]]
       inverse = Matrix.columns [[-2, 1.5], [1, -0.5]]
 
-      m.invert!.all_close(inverse).should be_true
+      m.invert!.should be_all_close(inverse)
     end
 
     it "raises if non-square" do
@@ -146,7 +146,7 @@ describe Matrix do
         [3*7 + 4*10, 3*8 + 4*11, 3*9 + 4*12],
         [5*7 + 6*10, 5*8 + 6*11, 5*9 + 6*12],
       ]
-      (m1 * m2).all_close(expected).should be_true
+      (m1 * m2).should be_all_close(expected)
     end
 
     it "raises if rows don't match columns" do
@@ -210,7 +210,7 @@ describe Matrix do
       b = Matrix.columns [[1.0, 3.0, 5.0]]
       x = m.solve(b)
       expected = Matrix.columns [[0.3, 0.4, 0.0]]
-      x.all_close(expected).should be_true
+      x.should be_all_close(expected)
     end
 
     it "solves a square system for multiple rhss" do
@@ -218,7 +218,7 @@ describe Matrix do
       b = Matrix.columns [[1.0, 3.0, 5.0], [2.0, 6.0, 10.0]]
       x = m.solve(b)
       expected = Matrix.columns [[0.3, 0.4, 0.0], [0.6, 0.8, 0.0]]
-      x.all_close(expected).should be_true
+      x.should be_all_close(expected)
     end
   end
 end
