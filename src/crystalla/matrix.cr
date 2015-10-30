@@ -1,5 +1,8 @@
 module Crystalla
   class Matrix
+    include LapackHelper
+    include BlasHelper
+
     getter number_of_rows
     getter number_of_cols
     getter values
@@ -25,13 +28,11 @@ module Crystalla
 
     def self.rows(rows : Array(Array(Number)))
       check_rows_have_same_number_of_rows rows
-
       Matrix.columns rows.transpose
     end
 
     def self.zeros(number_of_rows, number_of_cols)
       validate_dimensions(number_of_rows, number_of_cols)
-
       Matrix.new(Array.new(number_of_rows * number_of_cols, 0.0), number_of_rows, number_of_cols)
     end
 
@@ -108,16 +109,7 @@ module Crystalla
         raise ArgumentError.new "number of rows/columns mismatch in matrix multiplication"
       end
 
-      c = Matrix.zeros(number_of_rows, other.number_of_cols)
-      LibBlas.dgemm(
-        LibBlas::Order::ColMajor,                                 # order
-        LibBlas::Transpose::NoTrans, LibBlas::Transpose::NoTrans, # transa, transb
-        number_of_rows, other.number_of_cols, number_of_cols,     # m, n, k
-        1.0, self, ld,                                            # alpha, a, lda
-        other, other.ld,                                          # b, ldb
-        1.0, c, c.ld                                              # beta, c, ldc
-      )
-      c
+      blas_multiply other
     end
 
     def prepend(row)
@@ -132,7 +124,7 @@ module Crystalla
       new_columns = [] of Array(Float64)
 
       i = 0
-      @values.each_slice(@number_of_rows) do |col|
+      @values.clone.each_slice(@number_of_rows) do |col|
         new_columns.push col.insert(index, row[i])
         i += 1
       end
@@ -176,20 +168,22 @@ module Crystalla
       end
 
       pivot_indices_array = Slice.new(number_of_rows, 0)
-      lapack_feedback = lapack_lu(pivot_indices_array)
-      raise "LU failed: code #{lapack_feedback}" if lapack_feedback != 0
-      lapack_feedback = lapack_invert(pivot_indices_array)
-      raise "sgetri_ returned an error!" if lapack_feedback != 0
+
+      lapack_lu!(pivot_indices_array)
+      lapack_invert!(pivot_indices_array)
+
       self
     end
 
     def solve(b : self)
-      raise ArgumentError.new "right hand side must have the same number of rows as left hand side"\
-        if self.number_of_rows != b.number_of_rows
+      if self.number_of_rows != b.number_of_rows
+        raise ArgumentError.new "right hand side must have the same number of rows as left hand side"
+      end
+
       lu = self.clone
       x = b.clone
-      lapack_feedback = lapack_solve(lu, x)
-      raise "Solve failed: code #{lapack_feedback}" if lapack_feedback != 0
+      lapack_solve(lu, x)
+
       x
     end
 
@@ -222,54 +216,6 @@ module Crystalla
       Matrix.rows rows
     end
 
-    private def lapack_lu(pivot_indices_array)
-      info = 0
-      LibLapack.lu(
-        pointerof(@number_of_rows), # m
-        pointerof(@number_of_cols), # n
-        self,                       # a
-        ld_ptr,                     # lda
-        pivot_indices_array,        # ipiv
-        pointerof(info)             # info
-      )
-      info
-    end
-
-    private def lapack_invert(pivot_indices_array)
-      workspace_length = number_of_rows * number_of_cols
-      workspace = Slice.new(workspace_length, 0.0)
-
-      info = 0
-      LibLapack.dgetri_(
-        pointerof(@number_of_rows),  # n
-        self,                        # a
-        ld_ptr,                      # lda
-        pivot_indices_array,         # ipiv
-        workspace,                   # work
-        pointerof(workspace_length), # lwork
-        pointerof(info)              # info
-)
-      info
-    end
-
-    private def lapack_solve(a, b)
-      info = 0
-      nhrs = b.number_of_cols
-      ldb = b.number_of_rows
-
-      LibLapack.dgesv(
-        pointerof(@number_of_rows),   # n
-        pointerof(nhrs),              # nhrs
-        a,                            # a
-        ld_ptr,                       # lda
-        Slice.new(number_of_rows, 0), # ipiv
-        b,                            # b
-        pointerof(ldb),               # ldb
-        pointerof(info)               # info
-      )
-      info
-    end
-
     private def self.check_columns_have_same_number_of_rows(columns)
       return if columns.empty?
 
@@ -290,14 +236,6 @@ module Crystalla
           raise ArgumentError.new "row ##{i + 1} must have #{number_of_cols} columns, not #{row.size}"
         end
       end
-    end
-
-    protected def ld
-      number_of_rows
-    end
-
-    protected def ld_ptr
-      pointerof(@number_of_rows)
     end
 
     def to_unsafe
