@@ -20,9 +20,9 @@ describe Matrix do
 
     it "creates a Matrix from given rows" do
       m = Matrix.rows [
-        [1, 2],
-        [3, 4],
-      ]
+            [1, 2],
+            [3, 4],
+          ]
 
       m[0, 0].should eq(1)
       m[0, 1].should eq(2)
@@ -41,6 +41,24 @@ describe Matrix do
       m.dimensions.should eq({1, 2})
       m[0, 0].should eq(0)
       m[0, 1].should eq(0)
+    end
+
+    it "creates a square identity matrix" do
+      m = Matrix.eye(2)
+      m.dimensions.should eq({2, 2})
+      m.should eq(Matrix.rows([[1.0, 0.0], [0.0, 1.0]]))
+    end
+
+    it "creates an identity matrix with more rows" do
+      m = Matrix.eye(3, 2)
+      m.dimensions.should eq({3, 2})
+      m.should eq(Matrix.rows([[1.0, 0.0], [0.0, 1.0], [0.0, 0.0]]))
+    end
+
+    it "creates an identity matrix with more cols" do
+      m = Matrix.eye(2, 3)
+      m.dimensions.should eq({2, 3})
+      m.should eq(Matrix.rows([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]))
     end
 
     it "raises if zeros gets negative rows or cols" do
@@ -133,31 +151,31 @@ describe Matrix do
   context "*" do
     it "mutliplies two matrices" do
       m1 = Matrix.rows [
-        [1, 2],
-        [3, 4],
-        [5, 6],
-      ]
+             [1, 2],
+             [3, 4],
+             [5, 6],
+           ]
       m2 = Matrix.rows [
-        [7, 8, 9],
-        [10, 11, 12],
-      ]
+             [7, 8, 9],
+             [10, 11, 12],
+           ]
       expected = Matrix.rows [
-        [1*7 + 2*10, 1*8 + 2*11, 1*9 + 2*12],
-        [3*7 + 4*10, 3*8 + 4*11, 3*9 + 4*12],
-        [5*7 + 6*10, 5*8 + 6*11, 5*9 + 6*12],
-      ]
+                   [1 * 7 + 2 * 10, 1 * 8 + 2 * 11, 1 * 9 + 2 * 12],
+                   [3 * 7 + 4 * 10, 3 * 8 + 4 * 11, 3 * 9 + 4 * 12],
+                   [5 * 7 + 6 * 10, 5 * 8 + 6 * 11, 5 * 9 + 6 * 12],
+                 ]
       (m1 * m2).all_close(expected).should be_true
     end
 
     it "raises if rows don't match columns" do
       m1 = Matrix.rows [
-        [1, 2],
-      ]
+             [1, 2],
+           ]
       m2 = Matrix.rows [
-        [7],
-        [8],
-        [9],
-      ]
+             [7],
+             [8],
+             [9],
+           ]
       expect_raises ArgumentError, "number of rows/columns mismatch in matrix multiplication" do
         m1 * m2
       end
