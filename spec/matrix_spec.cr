@@ -304,4 +304,11 @@ describe Matrix do
       x.should be_all_close(expected)
     end
   end
+
+  context "transpose" do
+    it "transposes" do
+      m = Matrix.rows [[1,2,3],[3,2,1]]
+      m.transpose.should eq(Matrix.columns [[1,2,3],[3,2,1]])
+    end
+  end
 end

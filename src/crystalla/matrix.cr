@@ -214,6 +214,14 @@ module Crystalla
       end
     end
 
+    def transpose
+      rows = [] of Array(Float64)
+      @values.each_slice(number_of_rows) do |col|
+        rows.push col
+      end
+      Matrix.rows rows
+    end
+
     private def lapack_lu(pivot_indices_array)
       info = 0
       LibLapack.lu(
