@@ -164,6 +164,54 @@ describe Matrix do
     end
   end
 
+  context "+" do
+    it "adds two matrices" do
+      m1 = Matrix.rows [
+             [1, 2],
+             [3, 4],
+             [5, 6],
+           ]
+      m2 = Matrix.rows [
+             [7, 8],
+             [9, 10],
+             [11, 12],
+           ]
+      expected = Matrix.rows [
+                   [8, 10],
+                   [12, 14],
+                   [16, 18],
+                 ]
+      (m1 + m2).all_close(expected).should be_true
+    end
+
+    it "raises if rows don't match" do
+      m1 = Matrix.rows [
+             [1, 2],
+           ]
+      m2 = Matrix.rows [
+             [7, 8],
+             [8, 9],
+           ]
+      expect_raises ArgumentError do
+        m1 + m2
+      end
+    end
+
+    it "raises if cols don't match" do
+      m1 = Matrix.rows [
+             [1, 2],
+             [1, 2],
+           ]
+      m2 = Matrix.rows [
+             [7, 8, 10],
+             [8, 9, 10],
+           ]
+      expect_raises ArgumentError do
+        m1 + m2
+      end
+    end
+  end
+
   context "add rows" do
     it "adds a row at the beginning" do
       m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
