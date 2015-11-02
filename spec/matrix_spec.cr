@@ -276,6 +276,7 @@ describe Matrix do
       m = Matrix.rows([[1.0, 2.0], [-3.0, -4.0]])
       expected = Matrix.rows([[-1.0, -2.0], [3.0, 4.0]])
       (-m).should be_all_close(expected)
+      m.should be_all_close(Matrix.rows([[1.0, 2.0], [-3.0, -4.0]]))
     end
   end
 

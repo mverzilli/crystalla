@@ -122,11 +122,7 @@ module Crystalla
     end
 
     def -
-      m = self.clone
-      m.values.size.times do |i|
-        m.values[i] = -m.values[i]
-      end
-      m
+      Matrix.new values.map(&.-), @number_of_rows, @number_of_cols
     end
 
     def *(other : self)
