@@ -247,6 +247,14 @@ describe Matrix do
     end
   end
 
+  context "unary -" do
+    it "negates a matrix" do
+      m = Matrix.rows([[1.0, 2.0], [-3.0, -4.0]])
+      expected = Matrix.rows([[-1.0, -2.0], [3.0, 4.0]])
+      (-m).should be_all_close(expected)
+    end
+  end
+
   context "add rows" do
     it "adds a row at the beginning" do
       m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]

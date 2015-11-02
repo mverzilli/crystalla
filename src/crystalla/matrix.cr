@@ -104,6 +104,13 @@ module Crystalla
       Matrix.new(added, number_of_rows, number_of_cols)
     end
 
+    def -
+      @values.size.times do |i|
+        @values[i] = -@values[i]
+      end
+      self
+    end
+
     def *(other : self)
       if number_of_cols != other.number_of_rows
         raise ArgumentError.new "number of rows/columns mismatch in matrix multiplication"
