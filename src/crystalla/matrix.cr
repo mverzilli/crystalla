@@ -143,8 +143,8 @@ module Crystalla
       compare(other) { |index, value| value == other.values[index] }
     end
 
-    def all_close(other)
-      compare(other) { |index, value| value.close_to(other.values[index]) }
+    def all_close(other, absolute_tolerance = nil, relative_tolerance = nil)
+      compare(other) { |index, value| value.close_to(other.values[index], absolute_tolerance, relative_tolerance) }
     end
 
     def compare(other)
