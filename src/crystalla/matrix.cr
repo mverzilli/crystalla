@@ -122,10 +122,11 @@ module Crystalla
     end
 
     def -
-      @values.size.times do |i|
-        @values[i] = -@values[i]
+      m = self.clone
+      m.values.size.times do |i|
+        m.values[i] = -m.values[i]
       end
-      self
+      m
     end
 
     def *(other : self)
