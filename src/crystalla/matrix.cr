@@ -60,6 +60,19 @@ module Crystalla
       Matrix.new(values, number_of_rows, number_of_cols)
     end
 
+    def self.diag(diagonal)
+      diag(diagonal, diagonal.size, diagonal.size)
+    end
+
+    def self.diag(diagonal, number_of_rows, number_of_cols)
+      m = self.zeros(number_of_rows, number_of_cols)
+      diagonal.each_with_index do |x, i|
+        break if i >= number_of_rows || i >= number_of_cols
+        m[i, i] = x
+      end
+      return m
+    end
+
     def self.eye(number_of_rows_and_cols)
       eye(number_of_rows_and_cols, number_of_rows_and_cols)
     end

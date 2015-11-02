@@ -101,6 +101,30 @@ describe Matrix do
         (value - value.to_i).should be_close(0, 0.0000001)
       end
     end
+
+    it "creates a square diagonal matrix from an array" do
+      m = Matrix.diag([1.0, 2.0])
+      expected = Matrix.rows([[1.0, 0.0], [0.0, 2.0]])
+      m.should be_all_close(expected)
+    end
+
+    it "creates a 2x3 diagonal matrix from an 2-elems array" do
+      m = Matrix.diag([1.0, 2.0], 2, 3)
+      expected = Matrix.rows([[1.0, 0.0, 0.0], [0.0, 2.0, 0.0]])
+      m.should be_all_close(expected)
+    end
+
+    it "creates a 3x2 diagonal matrix from an 2-elems array" do
+      m = Matrix.diag([1.0, 2.0], 3, 2)
+      expected = Matrix.rows([[1.0, 0.0], [0.0, 2.0], [0.0, 0.0]])
+      m.should be_all_close(expected)
+    end
+
+    it "creates a 3x2 diagonal matrix from an 4-elems array" do
+      m = Matrix.diag([1.0, 2.0, 3.0, 4.0], 3, 2)
+      expected = Matrix.rows([[1.0, 0.0], [0.0, 2.0], [0.0, 0.0]])
+      m.should be_all_close(expected)
+    end
   end
 
   context "dimensions" do
