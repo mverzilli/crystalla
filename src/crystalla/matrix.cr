@@ -36,6 +36,10 @@ module Crystalla
       Matrix.new(Array.new(number_of_rows * number_of_cols, 0.0), number_of_rows, number_of_cols)
     end
 
+    def self.empty
+      Matrix.new(Array.new(0, 0.0), 0, 0)
+    end
+
     def self.rand(number_of_rows, number_of_cols)
       validate_dimensions(number_of_rows, number_of_cols)
 
@@ -234,6 +238,27 @@ module Crystalla
         rows.push col
       end
       Matrix.rows rows
+    end
+
+    class SVD
+      getter :u, :s, :vt
+
+      def initialize(@u, @s, @vt); end
+    end
+
+    def svd
+      u = Matrix.zeros(@number_of_rows, @number_of_rows)
+      vt = Matrix.zeros(@number_of_cols, @number_of_cols)
+      s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
+
+      lapack_svd(u, s, vt)
+      return {u, s, vt}
+    end
+
+    def singular_values
+      s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
+      lapack_svd(nil, s, nil)
+      s
     end
 
     private def self.check_columns_have_same_number_of_rows(columns)
