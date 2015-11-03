@@ -36,6 +36,10 @@ module Crystalla
       Matrix.new(Array.new(number_of_rows * number_of_cols, 0.0), number_of_rows, number_of_cols)
     end
 
+    def self.empty
+      Matrix.new(Array.new(0, 0.0), 0, 0)
+    end
+
     def self.rand(number_of_rows, number_of_cols)
       validate_dimensions(number_of_rows, number_of_cols)
 
@@ -58,6 +62,19 @@ module Crystalla
       end
 
       Matrix.new(values, number_of_rows, number_of_cols)
+    end
+
+    def self.diag(diagonal)
+      diag(diagonal, diagonal.size, diagonal.size)
+    end
+
+    def self.diag(diagonal, number_of_rows, number_of_cols)
+      m = self.zeros(number_of_rows, number_of_cols)
+      diagonal.each_with_index do |x, i|
+        break if i >= number_of_rows || i >= number_of_cols
+        m[i, i] = x
+      end
+      return m
     end
 
     def self.eye(number_of_rows_and_cols)
@@ -104,6 +121,10 @@ module Crystalla
       Matrix.new(added, number_of_rows, number_of_cols)
     end
 
+    def -
+      Matrix.new values.map(&.-), @number_of_rows, @number_of_cols
+    end
+
     def *(other : self)
       if number_of_cols != other.number_of_rows
         raise ArgumentError.new "number of rows/columns mismatch in matrix multiplication"
@@ -136,8 +157,8 @@ module Crystalla
       compare(other) { |index, value| value == other.values[index] }
     end
 
-    def all_close(other)
-      compare(other) { |index, value| value.close_to(other.values[index]) }
+    def all_close(other, absolute_tolerance = nil, relative_tolerance = nil)
+      compare(other) { |index, value| value.close_to(other.values[index], absolute_tolerance, relative_tolerance) }
     end
 
     def compare(other)
@@ -214,6 +235,21 @@ module Crystalla
         rows.push col
       end
       Matrix.rows rows
+    end
+
+    def svd
+      u = Matrix.zeros(@number_of_rows, @number_of_rows)
+      vt = Matrix.zeros(@number_of_cols, @number_of_cols)
+      s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
+
+      lapack_svd(u, s, vt)
+      return {u, s, vt}
+    end
+
+    def singular_values
+      s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
+      lapack_svd(nil, s, nil)
+      s
     end
 
     private def self.check_columns_have_same_number_of_rows(columns)

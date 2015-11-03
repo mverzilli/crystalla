@@ -46,6 +46,7 @@ m.print
 * Compare two matrices value-by-value: exact match or closeness (given absolute and relative epsilon values).
 * Invert matrices (destructive).
 * Solve system of linear equations.
+* Singular value decomposition.
 
 ## Development
 

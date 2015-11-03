@@ -101,6 +101,30 @@ describe Matrix do
         (value - value.to_i).should be_close(0, 0.0000001)
       end
     end
+
+    it "creates a square diagonal matrix from an array" do
+      m = Matrix.diag([1.0, 2.0])
+      expected = Matrix.rows([[1.0, 0.0], [0.0, 2.0]])
+      m.should be_all_close(expected)
+    end
+
+    it "creates a 2x3 diagonal matrix from an 2-elems array" do
+      m = Matrix.diag([1.0, 2.0], 2, 3)
+      expected = Matrix.rows([[1.0, 0.0, 0.0], [0.0, 2.0, 0.0]])
+      m.should be_all_close(expected)
+    end
+
+    it "creates a 3x2 diagonal matrix from an 2-elems array" do
+      m = Matrix.diag([1.0, 2.0], 3, 2)
+      expected = Matrix.rows([[1.0, 0.0], [0.0, 2.0], [0.0, 0.0]])
+      m.should be_all_close(expected)
+    end
+
+    it "creates a 3x2 diagonal matrix from an 4-elems array" do
+      m = Matrix.diag([1.0, 2.0, 3.0, 4.0], 3, 2)
+      expected = Matrix.rows([[1.0, 0.0], [0.0, 2.0], [0.0, 0.0]])
+      m.should be_all_close(expected)
+    end
   end
 
   context "dimensions" do
@@ -177,10 +201,10 @@ describe Matrix do
              [10, 11, 12],
            ]
       expected = Matrix.rows [
-        [1*7 + 2*10, 1*8 + 2*11, 1*9 + 2*12],
-        [3*7 + 4*10, 3*8 + 4*11, 3*9 + 4*12],
-        [5*7 + 6*10, 5*8 + 6*11, 5*9 + 6*12],
-      ]
+                   [1 * 7 + 2 * 10, 1 * 8 + 2 * 11, 1 * 9 + 2 * 12],
+                   [3 * 7 + 4 * 10, 3 * 8 + 4 * 11, 3 * 9 + 4 * 12],
+                   [5 * 7 + 6 * 10, 5 * 8 + 6 * 11, 5 * 9 + 6 * 12],
+                 ]
       (m1 * m2).should be_all_close(expected)
     end
 
@@ -247,6 +271,15 @@ describe Matrix do
     end
   end
 
+  context "unary -" do
+    it "negates a matrix" do
+      m = Matrix.rows([[1.0, 2.0], [-3.0, -4.0]])
+      expected = Matrix.rows([[-1.0, -2.0], [3.0, 4.0]])
+      (-m).should be_all_close(expected)
+      m.should be_all_close(Matrix.rows([[1.0, 2.0], [-3.0, -4.0]]))
+    end
+  end
+
   context "add rows" do
     it "adds a row at the beginning" do
       m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
@@ -307,8 +340,27 @@ describe Matrix do
 
   context "transpose" do
     it "transposes" do
-      m = Matrix.rows [[1,2,3],[3,2,1]]
-      m.transpose.should eq(Matrix.columns [[1,2,3],[3,2,1]])
+      m = Matrix.rows [[1, 2, 3], [3, 2, 1]]
+      m.transpose.should eq(Matrix.columns [[1, 2, 3], [3, 2, 1]])
+    end
+  end
+
+  context "svd" do
+    it "returns full SVD" do
+      a = Matrix.rows([[3.0, 2.0, 2.0], [2.0, 3.0, -2.0]])
+      u, s, vt = a.svd
+
+      u.should be_all_close(Matrix.rows([[-0.7071, -0.7071], [-0.7071, 0.7071]]))
+      vt.should be_all_close(Matrix.rows([[-0.7071, -0.7071, 0.0], [-0.2357, 0.2357, -0.9428], [-0.6667, 0.6667, 0.3333]]), 0.001, 0.0)
+      s.should be_all_close([5.0, 3.0])
+
+      (u * Matrix.diag(s, a.number_of_rows, a.number_of_cols) * vt).should be_all_close(a)
+    end
+
+    it "returns singular values only" do
+      a = Matrix.rows([[3.0, 2.0, 2.0], [2.0, 3.0, -2.0]])
+      s = a.singular_values
+      s.should be_all_close([5.0, 3.0])
     end
   end
 end
