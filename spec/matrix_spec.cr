@@ -101,6 +101,18 @@ describe Matrix do
         (value - value.to_i).should be_close(0, 0.0000001)
       end
     end
+
+    it "creates with #[]" do
+      m = Matrix[
+        [1, 2],
+        [3, 4],
+      ]
+
+      m[0, 0].should eq(1)
+      m[0, 1].should eq(2)
+      m[1, 0].should eq(3)
+      m[1, 1].should eq(4)
+    end
   end
 
   context "dimensions" do
@@ -309,6 +321,44 @@ describe Matrix do
     it "transposes" do
       m = Matrix.rows [[1,2,3],[3,2,1]]
       m.transpose.should eq(Matrix.columns [[1,2,3],[3,2,1]])
+    end
+  end
+
+  context "to_s" do
+    it "with integers" do
+      Matrix[
+        [1, 2],
+        [3, 4],
+      ].to_s.should eq(
+        <<-STR
+Matrix[[ 1, 2 ],
+       [ 3, 4 ]]
+STR
+      )
+    end
+
+    it "with integers of different sizes" do
+      Matrix[
+        [10, 2],
+        [3, 40],
+      ].to_s.should eq(
+        <<-STR
+Matrix[[ 10,  2 ],
+       [  3, 40 ]]
+STR
+      )
+    end
+
+    it "with floats of different sizes" do
+      Matrix[
+        [10.1, 2.123],
+        [3.45, 40.1],
+      ].to_s.should eq(
+        <<-STR
+Matrix[[ 10.1 ,  2.123 ],
+       [  3.45, 40.1   ]]
+STR
+      )
     end
   end
 end

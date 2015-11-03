@@ -24,20 +24,26 @@ require "crystalla"
 # Matrixes are created from column arrays
 m = Crystalla::Matrix.columns [[1.0, 2.0], [3.0, 4.0]]
 
-p "This is how M looks now: "
-m.print
+puts "This is how M looks now: "
+puts m
+puts
 
-p "This is M's inverse (note it's inverted in place): "
+puts "This is M's inverse (note it's inverted in place): "
 m.invert!
-m.print
-
-# => "This is how M looks now: "
-# => "| 1  3 |"
-# => "| 2  4 |"
-# => "This is M's inverse (note it's inverted in place): "
-# => "| -2  1.5 |"
-# => "| 1  -0.5 |"
+puts m
 ```
+
+Output:
+
+```text
+This is how M looks now:
+Matrix[[ 1, 3 ],
+       [ 2, 4 ]]
+
+This is M's inverse (note it's inverted in place):
+Matrix[[ -2,  1.5 ],
+       [  1, -0.5 ]]
+ ```
 
 ## Features implemented so far
 

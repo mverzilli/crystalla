@@ -85,12 +85,16 @@ module Crystalla
       end
     end
 
-    def [](i, j)
-      values[number_of_rows * j + i]
+    def self.[](*values)
+      rows values.to_a
     end
 
-    def []=(i, j, x)
-      values[number_of_rows * j + i] = x
+    def [](row, col)
+      values[row_col_to_index(row, col)]
+    end
+
+    def []=(row, col, value)
+      values[row_col_to_index(row, col)] = value.to_f64
     end
 
     def +(other : self)
@@ -198,14 +202,67 @@ module Crystalla
     end
 
     def to_s(io)
-      (0...number_of_rows).each do |i|
-        io.puts if i > 0
-        io << "|"
-        (0...number_of_cols).each do |j|
-          io << " " << self[i, j] << " "
+      # We traverse all numbers to find out, per each column:
+      # - The maximum number of digits to the left of the dot
+      # - The maximum number of digits to the right of the dot
+      infos = Array.new(number_of_cols, {0, 0})
+
+      # While we traverse the values we collect the resulting strings,
+      # together with left/right info
+      strings = Array.new(values.size, {"", 0, 0})
+
+      number_of_cols.times do |col|
+        current = {0, 0}
+
+        number_of_rows.times do |row|
+          str = self[row, col].to_s
+          dot_index = str.index('.')
+          if dot_index
+            left = dot_index
+            right = str.bytesize - dot_index - 1
+          else
+            left = str.bytesize
+            right = 0
+          end
+
+          strings[row_col_to_index(row, col)] = {str, left, right}
+
+          current = {left, current[1]} if left > current[0]
+          current = {current[0], right} if right > current[1]
+          infos[col] = current
         end
-        io << "|"
       end
+
+      # Now that we have all the info we need, we traverse the numbers again and
+      # apply paddings as necessary.
+      io << "Matrix["
+      number_of_rows.times do |i|
+        if i > 0
+          io << ","
+          io.puts
+          #      Matrix[
+          io << "       "
+        end
+        io << "[ "
+        number_of_cols.times do |j|
+          io << ", " if j > 0
+
+          # Get string to format info
+          str, left, right = strings[row_col_to_index(i, j)]
+
+          # Get column info
+          info_left, info_right = infos[j]
+
+          # Apply padding to the left of the dot
+          (info_left - left).times { io << " " }
+          io << str
+
+          # Apply padding to the right of the dot
+          (info_right - right).times { io << " " }
+        end
+        io << " ]"
+      end
+      io << "]"
     end
 
     def transpose
@@ -236,6 +293,10 @@ module Crystalla
           raise ArgumentError.new "row ##{i + 1} must have #{number_of_cols} columns, not #{row.size}"
         end
       end
+    end
+
+    private def row_col_to_index(row, col)
+      number_of_rows * col + row
     end
 
     def to_unsafe
