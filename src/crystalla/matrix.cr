@@ -311,7 +311,10 @@ module Crystalla
           io << str
 
           # Apply padding to the right of the dot
-          (info_right - right).times { io << " " }
+          right_padding = info_right - right
+          # Add one if the current number doesn't have a dot but the maximum does
+          right_padding += 1 if right == 0 && info_right > 0
+          right_padding.times { io << " " }
         end
         io << " ]"
       end
