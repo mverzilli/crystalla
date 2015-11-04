@@ -439,6 +439,18 @@ Matrix[[ 10.1 ,  2.123 ],
 STR
       )
     end
+
+    it "with int and floats" do
+      Matrix[
+        [1, 2],
+        [0.1, 0.2],
+      ].to_s.should eq(
+        <<-STR
+Matrix[[ 1  , 2   ],
+       [ 0.1, 0.2 ]]
+STR
+      )
+    end
   end
 
   context "observers (as in Algebraic Data Types, not the pattern!)" do
