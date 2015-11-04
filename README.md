@@ -48,15 +48,16 @@ Matrix[[ -2,  1.5 ],
 ## Features implemented so far
 
 * Load matrices from space separated plain text files.
+* Create constant matrices.
 * Add rows at an arbitrary position (non-destructive).
 * Compare two matrices value-by-value: exact match or closeness (given absolute and relative epsilon values).
 * Invert matrices (destructive).
-* Solve system of linear equations.
-* Singular value decomposition.
+* Solve linear equations systems.
+* Singular Value Decomposition.
 
 ## Development
 
-Currently it only supports development and usage on OS X.
+Currently it only supports development and usage on OS X, but it should be almost trivial to support Linux distros.
 
 ## Contributing
 
