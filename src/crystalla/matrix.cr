@@ -162,6 +162,21 @@ module Crystalla
       add_row(@number_of_rows, row)
     end
 
+    def add_row(index, m : Matrix)
+      #TODO: maybe it just doesn't make sense to have
+      #single row insertion methods. I should be able to
+      #add any number of consecutive rows from an index in the
+      #form of a matrix... it's much more handy!
+      raise ArgumentError.new "matrix is not a row vector" unless m.row_vector?
+      raise ArgumentError.new "matrix has a different number of columns" unless m.number_of_cols == number_of_cols
+
+      add_row index, m.values.clone
+    end
+
+    def row_vector?
+      @number_of_rows == 1
+    end
+
     def add_row(index, row)
       new_columns = [] of Array(Float64)
 

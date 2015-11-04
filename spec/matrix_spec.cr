@@ -330,6 +330,14 @@ describe Matrix do
       new_m.should eq(Matrix.columns [[1.0, 1.0, 3.0], [2.0, 1.0, 4.0]])
     end
 
+    it "adds a Matrix that's a row vector at the middle" do
+      m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
+      new_row = Matrix.ones(1, m.number_of_cols)
+
+      new_m = m.add_row(1, new_row)
+      new_m.should eq(Matrix.columns [[1.0, 1.0, 3.0], [2.0, 1.0, 4.0]])
+    end
+
     it "adds a row at the bottom" do
       m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
       new_row = [1.0] * m.number_of_cols
@@ -430,6 +438,15 @@ Matrix[[ 10.1 ,  2.123 ],
        [  3.45, 40.1   ]]
 STR
       )
+    end
+  end
+
+  context "observers (as in Algebraic Data Types, not the pattern!)" do
+    it "row_vector?" do
+      m1 = Matrix.rows [[1,1],[2,2]]
+      m2 = Matrix.rows [[1,1,2,2]]
+      m1.row_vector?.should be_false
+      m2.row_vector?.should be_true
     end
   end
 end
