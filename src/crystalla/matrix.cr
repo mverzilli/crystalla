@@ -341,6 +341,12 @@ module Crystalla
       s
     end
 
+    # Returns the sum of the diagonal elements. Only useful for numeric matrices.
+    def trace : Float64
+      raise ArgumentError.new "Number of rows (#{number_of_rows}) does not match number of columns (#{number_of_cols})" unless square?
+      (0...number_of_cols).sum(0.0) { |i| self[i, i] }
+    end
+
     private def self.check_columns_have_same_number_of_rows(columns)
       return if columns.empty?
 

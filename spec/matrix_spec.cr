@@ -403,6 +403,20 @@ describe Matrix do
     end
   end
 
+  context "trace" do
+    it "computes trace for floats" do
+      m = Matrix.rows([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], [7.7, 8.8, 9.9]])
+      m.trace.should eq(16.5) # 1.1 + 5.5 + 9.9
+    end
+
+    it "raises an error when matrix isn't square" do
+      a = Matrix.rows([[1, 2, 3, 4], [5, 6, 7, 8]])
+      expect_raises ArgumentError, "Number of rows (2) does not match number of columns (4)" do
+        a.trace
+      end
+    end
+  end
+
   context "to_s" do
     it "with integers" do
       Matrix[
