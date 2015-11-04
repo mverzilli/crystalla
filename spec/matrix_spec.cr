@@ -43,6 +43,13 @@ describe Matrix do
       m[0, 1].should eq(0)
     end
 
+    it "creates a matrix of ones" do
+      m = Matrix.ones(1, 2)
+      m.dimensions.should eq({1, 2})
+      m[0, 0].should eq(1)
+      m[0, 1].should eq(1)
+    end
+
     it "creates a square identity matrix" do
       m = Matrix.eye(2)
       m.dimensions.should eq({2, 2})

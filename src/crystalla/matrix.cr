@@ -32,8 +32,16 @@ module Crystalla
     end
 
     def self.zeros(number_of_rows, number_of_cols)
+      self.constant_matrix(0, number_of_rows, number_of_cols)
+    end
+
+    def self.ones(number_of_rows, number_of_cols)
+      self.constant_matrix(1, number_of_rows, number_of_cols)
+    end
+
+    def self.constant_matrix(value, number_of_rows, number_of_cols)
       validate_dimensions(number_of_rows, number_of_cols)
-      Matrix.new(Array.new(number_of_rows * number_of_cols, 0.0), number_of_rows, number_of_cols)
+      Matrix.new(Array.new(number_of_rows * number_of_cols, value.to_f), number_of_rows, number_of_cols)
     end
 
     def self.empty
