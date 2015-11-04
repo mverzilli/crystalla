@@ -44,6 +44,15 @@ module Crystalla
       Matrix.new(Array.new(number_of_rows * number_of_cols, value.to_f), number_of_rows, number_of_cols)
     end
 
+    def self.rand_perm(n : Int32)
+      raise ArgumentError.new("rand_perm given size must be greater than 0") if n <= 0
+      Matrix.row_vector (0...n).to_a.shuffle
+    end
+
+    def self.row_vector(values)
+      Matrix.rows [values]
+    end
+
     def self.empty
       Matrix.new(Array.new(0, 0.0), 0, 0)
     end

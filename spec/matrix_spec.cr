@@ -68,6 +68,18 @@ describe Matrix do
       m.should eq(Matrix.rows([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]))
     end
 
+    it "creates a row vector given an array" do
+      m = Matrix.row_vector [3,2,1]
+      m.dimensions.should eq({1,3})
+      [3,2,1].each_with_index {|val, index| val.should eq m[0,index]}
+    end
+
+    it "creates a row vector containing a random permutation of the integers from 0 to n exclusive" do
+      m = Matrix.rand_perm(3)
+      m.dimensions.should eq ({1, 3})
+      [0,1,2].permutations(3).map{|p| Matrix.row_vector(p)}.any?(&.==(m)).should be_true
+    end
+
     it "raises if zeros gets negative rows or cols" do
       expect_raises ArgumentError, "negative number of rows" do
         Matrix.zeros(-1, 2)
