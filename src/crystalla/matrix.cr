@@ -9,16 +9,16 @@ module Crystalla
 
     def initialize(@values : Array(Float64), @number_of_rows : Int32, @number_of_cols : Int32); end
 
-    def self.columns(columns : Array(Array(Float64)))
+    def self.columns(columns : Array(Array(Float64))) : Matrix
       check_columns_have_same_number_of_rows columns
       Matrix.new columns.flatten, columns.first.size, columns.size
     end
 
-    def self.columns(columns : Array(Array(Number)))
+    def self.columns(columns : Array(Array(Number))) : Matrix
       Matrix.columns columns.map(&.map(&.to_f))
     end
 
-    def self.load(file)
+    def self.load(file : String) : Matrix
       rows = [] of Array(Float64)
       File.each_line(file) do |line|
         rows.push line.split.map(&.to_f)
@@ -31,33 +31,33 @@ module Crystalla
       Matrix.columns rows.transpose
     end
 
-    def self.zeros(number_of_rows, number_of_cols)
+    def self.zeros(number_of_rows : Int32, number_of_cols : Int32) : Matrix
       self.constant_matrix(0, number_of_rows, number_of_cols)
     end
 
-    def self.ones(number_of_rows, number_of_cols)
+    def self.ones(number_of_rows : Int32, number_of_cols : Int32) : Matrix
       self.constant_matrix(1, number_of_rows, number_of_cols)
     end
 
-    def self.constant_matrix(value, number_of_rows, number_of_cols)
+    def self.constant_matrix(value : Number, number_of_rows : Int32, number_of_cols : Int32) : Matrix
       validate_dimensions(number_of_rows, number_of_cols)
       Matrix.new(Array.new(number_of_rows * number_of_cols, value.to_f), number_of_rows, number_of_cols)
     end
 
-    def self.rand_perm(n : Int32)
+    def self.rand_perm(n : Int32) : Matrix
       raise ArgumentError.new("rand_perm given size must be greater than 0") if n <= 0
       Matrix.row_vector (0...n).to_a.shuffle
     end
 
-    def self.row_vector(values)
+    def self.row_vector(values : Array(Number)) : Matrix
       Matrix.rows [values]
     end
 
-    def self.empty
+    def self.empty : Matrix
       Matrix.new(Array.new(0, 0.0), 0, 0)
     end
 
-    def self.rand(number_of_rows, number_of_cols)
+    def self.rand(number_of_rows : Int32, number_of_cols : Int32) : Matrix
       validate_dimensions(number_of_rows, number_of_cols)
 
       r = Random.new
@@ -69,7 +69,7 @@ module Crystalla
       Matrix.new(values, number_of_rows, number_of_cols)
     end
 
-    def self.rand(number_of_rows, number_of_cols, range)
+    def self.rand(number_of_rows : Int32, number_of_cols : Int32, range : Range(Int32, Int32)) : Matrix
       validate_dimensions(number_of_rows, number_of_cols)
 
       r = Random.new
@@ -81,11 +81,11 @@ module Crystalla
       Matrix.new(values, number_of_rows, number_of_cols)
     end
 
-    def self.diag(diagonal)
+    def self.diag(diagonal : Array(Number)) : Matrix
       diag(diagonal, diagonal.size, diagonal.size)
     end
 
-    def self.diag(diagonal, number_of_rows, number_of_cols)
+    def self.diag(diagonal : Array(Number), number_of_rows : Int32, number_of_cols : Int32) : Matrix
       m = self.zeros(number_of_rows, number_of_cols)
       diagonal.each_with_index do |x, i|
         break if i >= number_of_rows || i >= number_of_cols
@@ -94,11 +94,11 @@ module Crystalla
       return m
     end
 
-    def self.eye(number_of_rows_and_cols)
+    def self.eye(number_of_rows_and_cols : Int32) : Matrix
       eye(number_of_rows_and_cols, number_of_rows_and_cols)
     end
 
-    def self.eye(number_of_rows, number_of_cols)
+    def self.eye(number_of_rows : Int32, number_of_cols : Int32) : Matrix
       validate_dimensions(number_of_rows, number_of_cols)
 
       values = Array.new(number_of_rows * number_of_cols, 0.0)
@@ -109,7 +109,7 @@ module Crystalla
       Matrix.new(values, number_of_rows, number_of_cols)
     end
 
-    def self.validate_dimensions(number_of_rows, number_of_cols)
+    private def self.validate_dimensions(number_of_rows, number_of_cols)
       if number_of_rows < 0
         raise ArgumentError.new "negative number of rows"
       end
@@ -119,19 +119,19 @@ module Crystalla
       end
     end
 
-    def self.[](*values)
+    def self.[](*values : Array(Number)) : Matrix
       rows values.to_a
     end
 
-    def [](row, col)
+    def [](row, col) : Float64
       values[row_col_to_index(row, col)]
     end
 
-    def []=(row, col, value)
+    def []=(row : Int32, col : Int32, value : Number)
       values[row_col_to_index(row, col)] = value.to_f64
     end
 
-    def +(other : self)
+    def +(other : self) : Matrix
       raise ArgumentError.new "number of rows mismatch in matrix addition" if number_of_rows != other.number_of_rows
       raise ArgumentError.new "number of columns mismatch in matrix addition" if number_of_cols != other.number_of_cols
 
@@ -142,11 +142,11 @@ module Crystalla
       Matrix.new(added, number_of_rows, number_of_cols)
     end
 
-    def -
+    def - : Matrix
       Matrix.new values.map(&.-), @number_of_rows, @number_of_cols
     end
 
-    def *(other : self)
+    def *(other : self) : Matrix
       if number_of_cols != other.number_of_rows
         raise ArgumentError.new "number of rows/columns mismatch in matrix multiplication"
       end
@@ -154,15 +154,15 @@ module Crystalla
       blas_multiply other
     end
 
-    def prepend(row)
+    def prepend(row) : Matrix
       add_row(0, row)
     end
 
-    def append(row)
+    def append(row) : Matrix
       add_row(@number_of_rows, row)
     end
 
-    def add_row(index, m : Matrix)
+    def add_row(index, m : Matrix) : Matrix
       #TODO: maybe it just doesn't make sense to have
       #single row insertion methods. I should be able to
       #add any number of consecutive rows from an index in the
@@ -173,11 +173,11 @@ module Crystalla
       add_row index, m.values.clone
     end
 
-    def row_vector?
+    def row_vector? : Bool
       @number_of_rows == 1
     end
 
-    def add_row(index, row)
+    def add_row(index, row) : Matrix
       new_columns = [] of Array(Float64)
 
       i = 0
@@ -189,15 +189,15 @@ module Crystalla
       Matrix.columns new_columns
     end
 
-    def ==(other : Matrix)
+    def ==(other : Matrix) : Bool
       compare(other) { |index, value| value == other.values[index] }
     end
 
-    def all_close(other, absolute_tolerance = nil, relative_tolerance = nil)
+    def all_close(other : Matrix, absolute_tolerance = nil , relative_tolerance = nil) : Bool
       compare(other) { |index, value| value.close_to(other.values[index], absolute_tolerance, relative_tolerance) }
     end
 
-    def compare(other)
+    def compare(other : Matrix) : Bool
       return false unless self.dimensions == other.dimensions
 
       self.each do |index, value|
@@ -207,19 +207,19 @@ module Crystalla
       true
     end
 
-    def dimensions
+    def dimensions : Tuple(Int32, Int32)
       {number_of_rows, number_of_cols}
     end
 
-    def inspect(io)
+    def inspect(io) : String::Builder
       to_s(io)
     end
 
-    def clone
+    def clone : Matrix
       Matrix.new(@values.clone, @number_of_rows, @number_of_cols)
     end
 
-    def invert!
+    def invert! : Matrix
       unless square?
         raise ArgumentError.new "can't invert non-square matrix"
       end
@@ -232,7 +232,7 @@ module Crystalla
       self
     end
 
-    def solve(b : self)
+    def solve(b : self) : Matrix
       if self.number_of_rows != b.number_of_rows
         raise ArgumentError.new "right hand side must have the same number of rows as left hand side"
       end
@@ -250,11 +250,11 @@ module Crystalla
       end
     end
 
-    def square?
+    def square? : Bool
       number_of_rows == number_of_cols
     end
 
-    def to_s(io)
+    def to_s(io) : String::Builder
       # We traverse all numbers to find out, per each column:
       # - The maximum number of digits to the left of the dot
       # - The maximum number of digits to the right of the dot
@@ -321,7 +321,7 @@ module Crystalla
       io << "]"
     end
 
-    def transpose
+    def transpose : Matrix
       rows = [] of Array(Float64)
       @values.each_slice(number_of_rows) do |col|
         rows.push col
@@ -329,7 +329,9 @@ module Crystalla
       Matrix.rows rows
     end
 
-    def svd
+    #TODO: maybe S should also be returned as a Matrix.
+    # I guess it'll depend mostly on usage.
+    def svd : Tuple(Matrix, Array(Float64), Matrix)
       u = Matrix.zeros(@number_of_rows, @number_of_rows)
       vt = Matrix.zeros(@number_of_cols, @number_of_cols)
       s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
@@ -338,7 +340,7 @@ module Crystalla
       return {u, s, vt}
     end
 
-    def singular_values
+    def singular_values : Array(Float64)
       s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
       lapack_svd(nil, s, nil)
       s
