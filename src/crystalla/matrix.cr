@@ -142,6 +142,16 @@ module Crystalla
       end
     end
 
+    def each_row
+      (0...@number_of_rows).each do |i|
+        row = [] of Float64
+        (0...@number_of_cols).each do |j|
+          row.push self[i,j]
+        end
+        yield row, i
+      end
+    end
+
     def square? : Bool
       number_of_rows == number_of_cols
     end

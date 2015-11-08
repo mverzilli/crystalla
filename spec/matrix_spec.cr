@@ -475,4 +475,20 @@ STR
       m2.row_vector?.should be_true
     end
   end
+
+  context "each_row" do
+    it "yields each row as an Array(Float64)" do
+      m_rows = [[1.0,1.0], [2.0,2.0]] of Array(Float64)
+      m = Matrix.rows m_rows
+
+      m_each_row_result = [] of Array(Float64)
+      m.each_row {|row, index| m_each_row_result.push row }
+
+      m_rows.should eq(m_each_row_result)
+
+      # This is to ensure that we're yielding row copies
+      m_each_row_result[0][0] = 23.0
+      m[0,0].should eq(1)
+    end
+  end
 end
