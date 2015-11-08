@@ -1,3 +1,5 @@
+require "./matrix/builders"
+
 module Crystalla
   class Matrix
     include LapackHelper
@@ -8,116 +10,6 @@ module Crystalla
     getter values
 
     def initialize(@values : Array(Float64), @number_of_rows : Int32, @number_of_cols : Int32); end
-
-    def self.columns(columns : Array(Array(Float64))) : Matrix
-      check_columns_have_same_number_of_rows columns
-      Matrix.new columns.flatten, columns.first.size, columns.size
-    end
-
-    def self.columns(columns : Array(Array(Number))) : Matrix
-      Matrix.columns columns.map(&.map(&.to_f))
-    end
-
-    def self.load(file : String) : Matrix
-      rows = [] of Array(Float64)
-      File.each_line(file) do |line|
-        rows.push line.split.map(&.to_f)
-      end
-      Matrix.rows rows
-    end
-
-    def self.rows(rows : Array(Array(Number)))
-      check_rows_have_same_number_of_rows rows
-      Matrix.columns rows.transpose
-    end
-
-    def self.zeros(number_of_rows : Int32, number_of_cols : Int32) : Matrix
-      self.constant_matrix(0, number_of_rows, number_of_cols)
-    end
-
-    def self.ones(number_of_rows : Int32, number_of_cols : Int32) : Matrix
-      self.constant_matrix(1, number_of_rows, number_of_cols)
-    end
-
-    def self.constant_matrix(value : Number, number_of_rows : Int32, number_of_cols : Int32) : Matrix
-      validate_dimensions(number_of_rows, number_of_cols)
-      Matrix.new(Array.new(number_of_rows * number_of_cols, value.to_f), number_of_rows, number_of_cols)
-    end
-
-    def self.rand_perm(n : Int32) : Matrix
-      raise ArgumentError.new("rand_perm given size must be greater than 0") if n <= 0
-      Matrix.row_vector (0...n).to_a.shuffle
-    end
-
-    def self.row_vector(values : Array(Number)) : Matrix
-      Matrix.rows [values]
-    end
-
-    def self.empty : Matrix
-      Matrix.new(Array.new(0, 0.0), 0, 0)
-    end
-
-    def self.rand(number_of_rows : Int32, number_of_cols : Int32) : Matrix
-      validate_dimensions(number_of_rows, number_of_cols)
-
-      r = Random.new
-      values = Array.new(number_of_rows * number_of_cols, 0.0)
-      values.size.times do |i|
-        values[i] = r.next_float
-      end
-
-      Matrix.new(values, number_of_rows, number_of_cols)
-    end
-
-    def self.rand(number_of_rows : Int32, number_of_cols : Int32, range : Range(Int32, Int32)) : Matrix
-      validate_dimensions(number_of_rows, number_of_cols)
-
-      r = Random.new
-      values = Array.new(number_of_rows * number_of_cols, 0.0)
-      values.size.times do |i|
-        values[i] = r.rand(range).to_f
-      end
-
-      Matrix.new(values, number_of_rows, number_of_cols)
-    end
-
-    def self.diag(diagonal : Array(Number)) : Matrix
-      diag(diagonal, diagonal.size, diagonal.size)
-    end
-
-    def self.diag(diagonal : Array(Number), number_of_rows : Int32, number_of_cols : Int32) : Matrix
-      m = self.zeros(number_of_rows, number_of_cols)
-      diagonal.each_with_index do |x, i|
-        break if i >= number_of_rows || i >= number_of_cols
-        m[i, i] = x
-      end
-      return m
-    end
-
-    def self.eye(number_of_rows_and_cols : Int32) : Matrix
-      eye(number_of_rows_and_cols, number_of_rows_and_cols)
-    end
-
-    def self.eye(number_of_rows : Int32, number_of_cols : Int32) : Matrix
-      validate_dimensions(number_of_rows, number_of_cols)
-
-      values = Array.new(number_of_rows * number_of_cols, 0.0)
-      [number_of_cols, number_of_rows].min.times do |i|
-        values[number_of_rows * i + i] = 1.0
-      end
-
-      Matrix.new(values, number_of_rows, number_of_cols)
-    end
-
-    private def self.validate_dimensions(number_of_rows, number_of_cols)
-      if number_of_rows < 0
-        raise ArgumentError.new "negative number of rows"
-      end
-
-      if number_of_cols < 0
-        raise ArgumentError.new "negative number of columns"
-      end
-    end
 
     def self.[](*values : Array(Number)) : Matrix
       rows values.to_a
@@ -376,6 +268,16 @@ module Crystalla
 
     private def row_col_to_index(row, col)
       number_of_rows * col + row
+    end
+
+    private def self.validate_dimensions(number_of_rows, number_of_cols)
+      if number_of_rows < 0
+        raise ArgumentError.new "negative number of rows"
+      end
+
+      if number_of_cols < 0
+        raise ArgumentError.new "negative number of columns"
+      end
     end
 
     def to_unsafe
