@@ -314,18 +314,27 @@ describe Matrix do
   context "add rows" do
     it "adds a row at the beginning" do
       m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
-      new_row = [1.0] * m.number_of_cols
+      new_row = Matrix.ones 1, 2
 
       new_m = m.prepend(new_row)
 
       new_m.should eq(Matrix.columns [[1.0, 1.0, 3.0], [1.0, 2.0, 4.0]])
     end
 
+    it "adds rows from another Matrix at the middle" do
+      m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
+      new_rows = Matrix.constant_matrix 1.0, 2, 2
+
+      new_m = m.add_rows(1, new_rows)
+
+      new_m.should eq(Matrix.columns [[1.0, 1.0, 1.0, 3.0], [2.0, 1.0, 1.0, 4.0]])
+    end
+
     it "adds a row at the middle" do
       m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
-      new_row = [1.0] * m.number_of_cols
+      new_row = Matrix.ones 1, 2
 
-      new_m = m.add_row(1, new_row)
+      new_m = m.add_rows(1, new_row)
 
       new_m.should eq(Matrix.columns [[1.0, 1.0, 3.0], [2.0, 1.0, 4.0]])
     end
@@ -334,13 +343,13 @@ describe Matrix do
       m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
       new_row = Matrix.ones(1, m.number_of_cols)
 
-      new_m = m.add_row(1, new_row)
+      new_m = m.add_rows(1, new_row)
       new_m.should eq(Matrix.columns [[1.0, 1.0, 3.0], [2.0, 1.0, 4.0]])
     end
 
     it "adds a row at the bottom" do
       m = Matrix.columns [[1.0, 3.0], [2.0, 4.0]]
-      new_row = [1.0] * m.number_of_cols
+      new_row = Matrix.ones 1, 2
 
       new_m = m.append(new_row)
 
@@ -489,6 +498,21 @@ STR
       # This is to ensure that we're yielding row copies
       m_each_row_result[0][0] = 23.0
       m[0,0].should eq(1)
+    end
+  end
+
+  context "shuffle_cols" do
+    it "shuffles a Matrix's columns" do
+      m = Matrix.columns [[1, 2], [3, 4]]
+      m2 = m.shuffle_cols
+      m2.dimensions.should eq({2,2})
+
+      cols_were_swapped = m[0,0] == m2[0,1] &&
+                          m[1,0] == m2[1,1] &&
+                          m[0,1] == m2[0,0] &&
+                          m[1,1] == m2[1,0]
+
+      (m == m2 || cols_were_swapped).should be_true
     end
   end
 end

@@ -46,39 +46,41 @@ module Crystalla
       blas_multiply other
     end
 
-    def prepend(row) : Matrix
-      add_row(0, row)
+    def prepend(row : Matrix) : Matrix
+      add_rows(0, row)
     end
 
-    def append(row) : Matrix
-      add_row(@number_of_rows, row)
-    end
-
-    def add_row(index, m : Matrix) : Matrix
-      #TODO: maybe it just doesn't make sense to have
-      #single row insertion methods. I should be able to
-      #add any number of consecutive rows from an index in the
-      #form of a matrix... it's much more handy!
-      raise ArgumentError.new "matrix is not a row vector" unless m.row_vector?
-      raise ArgumentError.new "matrix has a different number of columns" unless m.number_of_cols == number_of_cols
-
-      add_row index, m.values.clone
+    def append(row : Matrix) : Matrix
+      add_rows(@number_of_rows, row)
     end
 
     def row_vector? : Bool
       @number_of_rows == 1
     end
 
-    def add_row(index, row) : Matrix
-      new_columns = [] of Array(Float64)
+    def add_rows(index : Int32, rows : Matrix) : Matrix
+      new_rows = [] of Array(Float64)
+      insert_rows = ->{ rows.each_row {|row, row_index| new_rows.push row} }
 
-      i = 0
-      @values.clone.each_slice(@number_of_rows) do |col|
-        new_columns.push col.insert(index, row[i])
-        i += 1
+      each_row do |row, row_index|
+        insert_rows.call if index == row_index
+        new_rows.push row
       end
 
-      Matrix.columns new_columns
+      insert_rows.call if index >= @number_of_rows
+
+      Matrix.rows new_rows
+    end
+
+    def shuffle_cols
+      new_indices = Matrix.rand_perm(@number_of_cols)
+      new_cols = Array.new(@number_of_cols, [] of Float64)
+
+      each_col do |col, index|
+        new_cols[new_indices.values[index].to_i] = col
+      end
+
+      Matrix.columns new_cols
     end
 
     def ==(other : Matrix) : Bool
@@ -103,7 +105,7 @@ module Crystalla
       {number_of_rows, number_of_cols}
     end
 
-    def inspect(io) : String::Builder
+    def inspect(io)
       to_s(io)
     end
 
@@ -152,11 +154,19 @@ module Crystalla
       end
     end
 
+    def each_col
+      i = 0
+      @values.each_slice(@number_of_rows) do |col|
+        yield col.dup, i
+        i += 1
+      end
+    end
+
     def square? : Bool
       number_of_rows == number_of_cols
     end
 
-    def to_s(io) : String::Builder
+    def to_s(io)
       # We traverse all numbers to find out, per each column:
       # - The maximum number of digits to the left of the dot
       # - The maximum number of digits to the right of the dot
