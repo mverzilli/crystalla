@@ -258,7 +258,7 @@ module Crystalla
       s
     end
 
-    def sub(rows : Range(Int32, Int32), cols : Range(Int32, Int32)) : Matrix
+    def [](rows : Range(Int32, Int32), cols : Range(Int32, Int32)) : Matrix
       if rows.end < 0
         rows = Range.new rows.begin, @number_of_rows + rows.end, rows.exclusive?
       end
