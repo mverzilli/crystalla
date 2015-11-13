@@ -258,6 +258,28 @@ module Crystalla
       s
     end
 
+    def sub(rows : Range(Int32, Int32), cols : Range(Int32, Int32)) : Matrix
+      if rows.end < 0
+        rows = Range.new rows.begin, @number_of_rows + rows.end, rows.exclusive?
+      end
+
+      if cols.end < 0
+        cols = Range.new cols.begin, @number_of_cols + cols.end, cols.exclusive?
+      end
+
+      validate_bounds(rows, cols)
+
+      new_rows = [] of Array(Float64)
+      rows.each do |i|
+        row = [] of Float64
+        cols.each do |j|
+          row.push self[i, j]
+        end
+        new_rows.push row
+      end
+      Matrix.rows new_rows
+    end
+
     # Returns the sum of the diagonal elements. Only useful for numeric matrices.
     def trace : Float64
       raise ArgumentError.new "Number of rows (#{number_of_rows}) does not match number of columns (#{number_of_cols})" unless square?
@@ -290,13 +312,25 @@ module Crystalla
       number_of_rows * col + row
     end
 
-    private def self.validate_dimensions(number_of_rows, number_of_cols)
+    def self.validate_dimensions(number_of_rows, number_of_cols)
       if number_of_rows < 0
         raise ArgumentError.new "negative number of rows"
       end
 
       if number_of_cols < 0
         raise ArgumentError.new "negative number of columns"
+      end
+    end
+
+    private def validate_bounds(rows, cols)
+      Matrix.validate_dimensions rows.begin, cols.begin
+
+      if rows.end > @number_of_rows || (rows.end == @number_of_rows && !rows.excludes_end?)
+        raise ArgumentError.new("requested rows are out of bounds")
+      end
+
+      if cols.end > @number_of_cols || (cols.end == @number_of_cols && !cols.excludes_end?)
+        raise ArgumentError.new("requested cols are out of bounds")
       end
     end
 

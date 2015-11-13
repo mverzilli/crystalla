@@ -515,4 +515,30 @@ STR
       (m == m2 || cols_were_swapped).should be_true
     end
   end
+
+  context "sub" do
+    m = Matrix.rows [
+      [1,2,3],
+      [4,5,6],
+      [7,8,9]
+    ]
+
+    it "returns a submatrix" do
+      m.sub(0..1, 0..1).should eq(Matrix.rows [[1,2], [4,5]])
+    end
+
+    it "interprets negatives as a count from the end of the dimension" do
+      m.sub(1..-2, 1..-2).should eq(Matrix.rows [[5]])
+    end
+
+    it "raises if out of bounds" do
+      expect_raises ArgumentError do
+        m.sub(0..3, 0..3)
+      end
+    end
+
+    it "doesn't raise if upper bound is exclusive" do
+      m.sub(0...3, 0...3).should eq(m)
+    end
+  end
 end
