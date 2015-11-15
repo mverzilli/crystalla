@@ -1,5 +1,6 @@
 require "./matrix/builders"
 require "./matrix/stats"
+require "./transformations/pca"
 
 module Crystalla
   class Matrix
@@ -26,7 +27,7 @@ module Crystalla
 
     def +(other : self) : Matrix
       zip_with(other) { |x, y| x + y }
-      end
+    end
 
     def -(other : self) : Matrix
       zip_with(other) { |x, y| x - y }
@@ -58,7 +59,7 @@ module Crystalla
 
     def add_rows(index : Int32, rows : Matrix) : Matrix
       new_rows = [] of Array(Float64)
-      insert_rows = ->{ rows.each_row {|row, row_index| new_rows.push row} }
+      insert_rows = ->{ rows.each_row { |row, row_index| new_rows.push row } }
 
       each_row do |row, row_index|
         insert_rows.call if index == row_index
@@ -85,7 +86,7 @@ module Crystalla
       compare(other) { |index, value| value == other.values[index] }
     end
 
-    def all_close(other : Matrix, absolute_tolerance = nil , relative_tolerance = nil) : Bool
+    def all_close(other : Matrix, absolute_tolerance = nil, relative_tolerance = nil) : Bool
       compare(other) { |index, value| value.close_to(other.values[index], absolute_tolerance, relative_tolerance) }
     end
 
@@ -146,7 +147,7 @@ module Crystalla
       (0...@number_of_rows).each do |i|
         row = [] of Float64
         (0...@number_of_cols).each do |j|
-          row.push self[i,j]
+          row.push self[i, j]
         end
         yield row, i
       end
@@ -250,7 +251,7 @@ module Crystalla
       Matrix.rows rows
     end
 
-    #TODO: maybe S should also be returned as a Matrix.
+    # TODO: maybe S should also be returned as a Matrix.
     # I guess it'll depend mostly on usage.
     def svd : Tuple(Matrix, Array(Float64), Matrix)
       u = Matrix.zeros(@number_of_rows, @number_of_rows)
