@@ -1,4 +1,5 @@
 require "./matrix/builders"
+require "./matrix/stats"
 
 module Crystalla
   class Matrix
