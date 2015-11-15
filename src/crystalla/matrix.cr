@@ -25,14 +25,11 @@ module Crystalla
     end
 
     def +(other : self) : Matrix
-      raise ArgumentError.new "number of rows mismatch in matrix addition" if number_of_rows != other.number_of_rows
-      raise ArgumentError.new "number of columns mismatch in matrix addition" if number_of_cols != other.number_of_cols
-
-      added = Array.new(number_of_rows * number_of_cols, 0.0)
-      values.size.times do |i|
-        added[i] = values[i] + other.values[i]
+      zip_with(other) { |x, y| x + y }
       end
-      Matrix.new(added, number_of_rows, number_of_cols)
+
+    def -(other : self) : Matrix
+      zip_with(other) { |x, y| x - y }
     end
 
     def - : Matrix
@@ -161,6 +158,17 @@ module Crystalla
         yield col.dup, i
         i += 1
       end
+    end
+
+    def zip_with(other : Matrix) : Matrix
+      raise ArgumentError.new "number of rows mismatch in matrix operation" if number_of_rows != other.number_of_rows
+      raise ArgumentError.new "number of columns mismatch in matrix operation" if number_of_cols != other.number_of_cols
+
+      new_values = Array.new(@values.size, 0.0)
+      self.each do |i, x|
+        new_values[i] = yield x, other.values[i]
+      end
+      Matrix.new(new_values, number_of_rows, number_of_cols)
     end
 
     def square? : Bool
