@@ -156,6 +156,18 @@ describe Matrix do
       m[1, 0].should eq(3)
       m[1, 1].should eq(4)
     end
+
+    it "creates by repeating a row" do
+      m = Matrix.repeat_row([1.0, 2.0], 4)
+      expected = Matrix.rows([[1.0, 2.0], [1.0, 2.0], [1.0, 2.0], [1.0, 2.0]])
+      m.should eq(expected)
+    end
+
+    it "creates by repeating a column" do
+      m = Matrix.repeat_column([1.0, 2.0, 3.0], 2)
+      expected = Matrix.rows([[1.0, 1.0], [2.0, 2.0], [3.0, 3.0]])
+      m.should eq(expected)
+    end
   end
 
   context "dimensions" do
