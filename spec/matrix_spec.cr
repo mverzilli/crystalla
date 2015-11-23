@@ -156,6 +156,18 @@ describe Matrix do
       m[1, 0].should eq(3)
       m[1, 1].should eq(4)
     end
+
+    it "creates by repeating a row" do
+      m = Matrix.repeat_row([1.0, 2.0], 4)
+      expected = Matrix.rows([[1.0, 2.0], [1.0, 2.0], [1.0, 2.0], [1.0, 2.0]])
+      m.should eq(expected)
+    end
+
+    it "creates by repeating a column" do
+      m = Matrix.repeat_column([1.0, 2.0, 3.0], 2)
+      expected = Matrix.rows([[1.0, 1.0], [2.0, 2.0], [3.0, 3.0]])
+      m.should eq(expected)
+    end
   end
 
   context "dimensions" do
@@ -271,7 +283,7 @@ describe Matrix do
                    [12, 14],
                    [16, 18],
                  ]
-      (m1 + m2).all_close(expected).should be_true
+      (m1 + m2).should be_all_close(expected)
     end
 
     it "raises if rows don't match" do
@@ -298,6 +310,54 @@ describe Matrix do
            ]
       expect_raises ArgumentError do
         m1 + m2
+      end
+    end
+  end
+
+  context "-" do
+    it "substracts two matrices" do
+      m1 = Matrix.rows [
+        [1, 2],
+        [3, 4],
+        [5, 6],
+      ]
+      m2 = Matrix.rows [
+        [7, 8],
+        [9, 10],
+        [11, 12],
+      ]
+      expected = Matrix.rows [
+        [6, 6],
+        [6, 6],
+        [6, 6],
+      ]
+      (m2 - m1).should be_all_close(expected)
+    end
+
+    it "raises if rows don't match" do
+      m1 = Matrix.rows [
+        [1, 2],
+      ]
+      m2 = Matrix.rows [
+        [7, 8],
+        [8, 9],
+      ]
+      expect_raises ArgumentError do
+        m1 - m2
+      end
+    end
+
+    it "raises if cols don't match" do
+      m1 = Matrix.rows [
+        [1, 2],
+        [1, 2],
+      ]
+      m2 = Matrix.rows [
+        [7, 8, 10],
+        [8, 9, 10],
+      ]
+      expect_raises ArgumentError do
+        m1 - m2
       end
     end
   end

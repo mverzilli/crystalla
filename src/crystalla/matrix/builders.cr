@@ -99,5 +99,14 @@ module Crystalla
 
       Crystalla::Matrix.new(values, number_of_rows, number_of_cols)
     end
+
+    def self.repeat_row(row : Array(Number), times : Int32) : Crystalla::Matrix
+      repeat_column(row, times).transpose
+    end
+
+    def self.repeat_column(column : Array(Number), times : Int32) : Crystalla::Matrix
+      values = column * times
+      Crystalla::Matrix.new(values, column.size, times)
+    end
   end
 end

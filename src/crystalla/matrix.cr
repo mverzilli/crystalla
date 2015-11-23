@@ -1,4 +1,6 @@
 require "./matrix/builders"
+require "./matrix/stats"
+require "./transformations/pca"
 
 module Crystalla
   class Matrix
@@ -24,14 +26,11 @@ module Crystalla
     end
 
     def +(other : self) : Matrix
-      raise ArgumentError.new "number of rows mismatch in matrix addition" if number_of_rows != other.number_of_rows
-      raise ArgumentError.new "number of columns mismatch in matrix addition" if number_of_cols != other.number_of_cols
+      zip_with(other) { |x, y| x + y }
+    end
 
-      added = Array.new(number_of_rows * number_of_cols, 0.0)
-      values.size.times do |i|
-        added[i] = values[i] + other.values[i]
-      end
-      Matrix.new(added, number_of_rows, number_of_cols)
+    def -(other : self) : Matrix
+      zip_with(other) { |x, y| x - y }
     end
 
     def - : Matrix
@@ -60,7 +59,7 @@ module Crystalla
 
     def add_rows(index : Int32, rows : Matrix) : Matrix
       new_rows = [] of Array(Float64)
-      insert_rows = ->{ rows.each_row {|row, row_index| new_rows.push row} }
+      insert_rows = ->{ rows.each_row { |row, row_index| new_rows.push row } }
 
       each_row do |row, row_index|
         insert_rows.call if index == row_index
@@ -87,7 +86,7 @@ module Crystalla
       compare(other) { |index, value| value == other.values[index] }
     end
 
-    def all_close(other : Matrix, absolute_tolerance = nil , relative_tolerance = nil) : Bool
+    def all_close(other : Matrix, absolute_tolerance = nil, relative_tolerance = nil) : Bool
       compare(other) { |index, value| value.close_to(other.values[index], absolute_tolerance, relative_tolerance) }
     end
 
@@ -148,7 +147,7 @@ module Crystalla
       (0...@number_of_rows).each do |i|
         row = [] of Float64
         (0...@number_of_cols).each do |j|
-          row.push self[i,j]
+          row.push self[i, j]
         end
         yield row, i
       end
@@ -160,6 +159,33 @@ module Crystalla
         yield col.dup, i
         i += 1
       end
+    end
+
+    def each_by_row
+      (0...@number_of_rows).each do |i|
+        (0...@number_of_cols).each do |j|
+          yield self[i, j], i, j
+        end
+      end
+    end
+
+    def each_by_col
+      (0...@number_of_cols).each do |j|
+        (0...@number_of_rows).each do |i|
+          yield self[i, j], i, j
+        end
+      end
+    end
+
+    def zip_with(other : Matrix) : Matrix
+      raise ArgumentError.new "number of rows mismatch in matrix operation" if number_of_rows != other.number_of_rows
+      raise ArgumentError.new "number of columns mismatch in matrix operation" if number_of_cols != other.number_of_cols
+
+      new_values = Array.new(@values.size, 0.0)
+      self.each do |i, x|
+        new_values[i] = yield x, other.values[i]
+      end
+      Matrix.new(new_values, number_of_rows, number_of_cols)
     end
 
     def square? : Bool
@@ -241,7 +267,7 @@ module Crystalla
       Matrix.rows rows
     end
 
-    #TODO: maybe S should also be returned as a Matrix.
+    # TODO: maybe S should also be returned as a Matrix.
     # I guess it'll depend mostly on usage.
     def svd : Tuple(Matrix, Array(Float64), Matrix)
       u = Matrix.zeros(@number_of_rows, @number_of_rows)
