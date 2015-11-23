@@ -2,7 +2,9 @@
 /libs/
 /.crystal/
 /.shards/
-
+/examples/**/.crystal/
+/examples/**/data/
+.DS_Store
 
 # Libraries don't need dependency lock
 # Dependencies will be locked in application that uses them
