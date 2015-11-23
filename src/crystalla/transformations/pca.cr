@@ -13,12 +13,13 @@ module Crystalla
 
   module Transformations
     class PCA
-      getter :n_components
+      getter :n_components, :mean_by_feature
 
       # Initializes a new PCA object with the model to fit and the number of components to use
       # The model should be a n_samples * n_features matrix
       def initialize(x : Crystalla::Matrix, @n_components : Int32)
         raise ArgumentError.new("Number of components must be smaller or equal to min(n_samples, n_features)") if @n_components > x.number_of_rows || @n_components > x.number_of_cols
+        @mean_by_feature = x.mean_by_col
         x_centered = center(x)
         @u, @s, @vt = x_centered.svd
       end
@@ -34,8 +35,8 @@ module Crystalla
       end
 
       private def center(x : Crystalla::Matrix) : Crystalla::Matrix
-        mean_sample = x.mean_by_col
-        return x - Crystalla::Matrix.repeat_row(mean_sample, x.number_of_rows)
+        return x if @mean_by_feature.sum.close_to(0.0)
+        x - Crystalla::Matrix.repeat_row(@mean_by_feature, x.number_of_rows)
       end
 
       private def s_values
