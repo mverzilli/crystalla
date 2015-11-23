@@ -161,6 +161,22 @@ module Crystalla
       end
     end
 
+    def each_by_row
+      (0...@number_of_rows).each do |i|
+        (0...@number_of_cols).each do |j|
+          yield self[i, j], i, j
+        end
+      end
+    end
+
+    def each_by_col
+      (0...@number_of_cols).each do |j|
+        (0...@number_of_rows).each do |i|
+          yield self[i, j], i, j
+        end
+      end
+    end
+
     def zip_with(other : Matrix) : Matrix
       raise ArgumentError.new "number of rows mismatch in matrix operation" if number_of_rows != other.number_of_rows
       raise ArgumentError.new "number of columns mismatch in matrix operation" if number_of_cols != other.number_of_cols
