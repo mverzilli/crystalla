@@ -1,4 +1,6 @@
 module Crystalla::LapackHelper
+  SVD_WORKSPACE_SIZE_MULTIPLIER = 2
+
   def lapack_lu!(pivot_indices_array)
     info = 0
 
@@ -9,7 +11,7 @@ module Crystalla::LapackHelper
       ld_ptr,                     # lda
       pivot_indices_array,        # ipiv
       pointerof(info)             # info
-)
+    )
 
     # TODO: handle specific error codes
     if info != 0
@@ -22,7 +24,7 @@ module Crystalla::LapackHelper
     workspace = Slice.new(workspace_length, 0.0)
     info = 0
 
-    LibLapack.dgetri_(
+    LibLapack.dgetri(
       pointerof(@number_of_rows),  # n
       self,                        # a
       ld_ptr,                      # lda
@@ -30,7 +32,7 @@ module Crystalla::LapackHelper
       workspace,                   # work
       pointerof(workspace_length), # lwork
       pointerof(info)              # info
-)
+    )
 
     raise "sgetri_ returned an error!" if info != 0
   end
@@ -49,7 +51,7 @@ module Crystalla::LapackHelper
       b,                            # b
       pointerof(ldb),               # ldb
       pointerof(info)               # info
-)
+    )
 
     raise "Solve failed: code #{info}" if info != 0
   end
@@ -60,12 +62,13 @@ module Crystalla::LapackHelper
 
     if u.nil? || vt.nil?
       jobz = 'N'
-      lwork = 2 * (3 * mindim + [maxdim, 7 * mindim].max)
+      lwork = (3 * mindim + [maxdim, 7 * mindim].max)
     else
       jobz = 'A'
-      lwork = 2 * (mindim * (6 + 4 * mindim) + maxdim)
+      lwork = (mindim * (6 + 4 * mindim) + maxdim)
     end
 
+    lwork = lwork * SVD_WORKSPACE_SIZE_MULTIPLIER
     u ||= Matrix.empty
     vt ||= Matrix.empty
     a = self.clone
@@ -86,6 +89,58 @@ module Crystalla::LapackHelper
       pointerof(ldu),  # ldu
       vt,              # vt
       pointerof(ldvt), # ldvt
+      work,
+      pointerof(lwork),
+      iwork,
+      pointerof(info)
+    )
+
+    raise "SVD failed: code #{info}" if info != 0
+  end
+
+  def lapack_partial_svd(u, s, vt, count)
+    mindim = [@number_of_rows, @number_of_cols].min
+    maxdim = [@number_of_rows, @number_of_cols].max
+
+    lwork = SVD_WORKSPACE_SIZE_MULTIPLIER * [mindim*(mindim + 4), mindim*2 + maxdim].max
+
+    jobz = u.nil? || vt.nil? ? 'N' : 'V'
+    range = 'I'
+
+    u ||= Matrix.empty
+    vt ||= Matrix.empty
+    a = self.clone
+
+    ldu = @number_of_rows
+    ldvt = @number_of_cols
+
+    vl = vu = 0.0
+    il = 1
+    iu = count
+
+    work = Array.new(lwork, 0.0)
+    iwork = Array.new(12 * mindim, 0)
+    info = 0
+    ns = 0
+
+    LibLapack.dgesvdx(
+      pointerof(jobz),  # jobu
+      pointerof(jobz),  # jobvt
+      pointerof(range), # range
+      ld_ptr,           # m
+      nd_ptr,           # n
+      a,                # a
+      ld_ptr,           # lda
+      pointerof(vl),    # vl
+      pointerof(vu),    # vu
+      pointerof(il),    # il
+      pointerof(iu),    # iu,
+      pointerof(ns),    # ns,
+      s,                # s
+      u,                # u
+      pointerof(ldu),   # ldu
+      vt,               # vt
+      pointerof(ldvt),  # ldvt
       work,
       pointerof(lwork),
       iwork,

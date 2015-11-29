@@ -20,9 +20,9 @@ describe Matrix do
 
     it "creates a Matrix from given rows" do
       m = Matrix.rows [
-            [1, 2],
-            [3, 4],
-          ]
+        [1, 2],
+        [3, 4],
+      ]
 
       m[0, 0].should eq(1)
       m[0, 1].should eq(2)
@@ -69,15 +69,15 @@ describe Matrix do
     end
 
     it "creates a row vector given an array" do
-      m = Matrix.row_vector [3,2,1]
-      m.dimensions.should eq({1,3})
-      [3,2,1].each_with_index {|val, index| val.should eq m[0,index]}
+      m = Matrix.row_vector [3, 2, 1]
+      m.dimensions.should eq({1, 3})
+      [3, 2, 1].each_with_index { |val, index| val.should eq m[0, index] }
     end
 
     it "creates a row vector containing a random permutation of the integers from 0 to n exclusive" do
       m = Matrix.rand_perm(3)
       m.dimensions.should eq ({1, 3})
-      [0,1,2].permutations(3).map{|p| Matrix.row_vector(p)}.any?(&.==(m)).should be_true
+      [0, 1, 2].permutations(3).map { |p| Matrix.row_vector(p) }.any?(&.==(m)).should be_true
     end
 
     it "raises if zeros gets negative rows or cols" do
@@ -235,31 +235,31 @@ describe Matrix do
   context "*" do
     it "mutliplies two matrices" do
       m1 = Matrix.rows [
-             [1, 2],
-             [3, 4],
-             [5, 6],
-           ]
+        [1, 2],
+        [3, 4],
+        [5, 6],
+      ]
       m2 = Matrix.rows [
-             [7, 8, 9],
-             [10, 11, 12],
-           ]
+        [7, 8, 9],
+        [10, 11, 12],
+      ]
       expected = Matrix.rows [
-                   [1 * 7 + 2 * 10, 1 * 8 + 2 * 11, 1 * 9 + 2 * 12],
-                   [3 * 7 + 4 * 10, 3 * 8 + 4 * 11, 3 * 9 + 4 * 12],
-                   [5 * 7 + 6 * 10, 5 * 8 + 6 * 11, 5 * 9 + 6 * 12],
-                 ]
+        [1 * 7 + 2 * 10, 1 * 8 + 2 * 11, 1 * 9 + 2 * 12],
+        [3 * 7 + 4 * 10, 3 * 8 + 4 * 11, 3 * 9 + 4 * 12],
+        [5 * 7 + 6 * 10, 5 * 8 + 6 * 11, 5 * 9 + 6 * 12],
+      ]
       (m1 * m2).should be_all_close(expected)
     end
 
     it "raises if rows don't match columns" do
       m1 = Matrix.rows [
-             [1, 2],
-           ]
+        [1, 2],
+      ]
       m2 = Matrix.rows [
-             [7],
-             [8],
-             [9],
-           ]
+        [7],
+        [8],
+        [9],
+      ]
       expect_raises ArgumentError, "number of rows/columns mismatch in matrix multiplication" do
         m1 * m2
       end
@@ -269,31 +269,31 @@ describe Matrix do
   context "+" do
     it "adds two matrices" do
       m1 = Matrix.rows [
-             [1, 2],
-             [3, 4],
-             [5, 6],
-           ]
+        [1, 2],
+        [3, 4],
+        [5, 6],
+      ]
       m2 = Matrix.rows [
-             [7, 8],
-             [9, 10],
-             [11, 12],
-           ]
+        [7, 8],
+        [9, 10],
+        [11, 12],
+      ]
       expected = Matrix.rows [
-                   [8, 10],
-                   [12, 14],
-                   [16, 18],
-                 ]
+        [8, 10],
+        [12, 14],
+        [16, 18],
+      ]
       (m1 + m2).should be_all_close(expected)
     end
 
     it "raises if rows don't match" do
       m1 = Matrix.rows [
-             [1, 2],
-           ]
+        [1, 2],
+      ]
       m2 = Matrix.rows [
-             [7, 8],
-             [8, 9],
-           ]
+        [7, 8],
+        [8, 9],
+      ]
       expect_raises ArgumentError do
         m1 + m2
       end
@@ -301,13 +301,13 @@ describe Matrix do
 
     it "raises if cols don't match" do
       m1 = Matrix.rows [
-             [1, 2],
-             [1, 2],
-           ]
+        [1, 2],
+        [1, 2],
+      ]
       m2 = Matrix.rows [
-             [7, 8, 10],
-             [8, 9, 10],
-           ]
+        [7, 8, 10],
+        [8, 9, 10],
+      ]
       expect_raises ArgumentError do
         m1 + m2
       end
@@ -465,10 +465,26 @@ describe Matrix do
       (u * Matrix.diag(s, a.number_of_rows, a.number_of_cols) * vt).should be_all_close(a)
     end
 
-    it "returns singular values only" do
+    it "returns all singular values" do
       a = Matrix.rows([[3.0, 2.0, 2.0], [2.0, 3.0, -2.0]])
       s = a.singular_values
       s.should be_all_close([5.0, 3.0])
+    end
+
+    it "returns first singular vectors" do
+      a = Matrix.rows([[3.0, 2.0, 2.0], [2.0, 3.0, -2.0]])
+      u, s, vt = a.svd(1)
+
+      u.should be_all_close(Matrix.rows([[-0.7071], [-0.7071]]))
+      vt.should be_all_close(Matrix.rows([[-0.7071, -0.7071, 0.0]]), 0.001, 0.0)
+      s.should be_all_close([5.0])
+    end
+
+    it "returns first singular value" do
+      a = Matrix.rows([[3.0, 2.0, 2.0], [2.0, 3.0, -2.0]])
+      s = a.singular_values(1)
+
+      s.should be_all_close([5.0])
     end
   end
 
@@ -538,8 +554,8 @@ STR
 
   context "observers (as in Algebraic Data Types, not the pattern!)" do
     it "row_vector?" do
-      m1 = Matrix.rows [[1,1],[2,2]]
-      m2 = Matrix.rows [[1,1,2,2]]
+      m1 = Matrix.rows [[1, 1], [2, 2]]
+      m2 = Matrix.rows [[1, 1, 2, 2]]
       m1.row_vector?.should be_false
       m2.row_vector?.should be_true
     end
@@ -547,17 +563,17 @@ STR
 
   context "each_row" do
     it "yields each row as an Array(Float64)" do
-      m_rows = [[1.0,1.0], [2.0,2.0]] of Array(Float64)
+      m_rows = [[1.0, 1.0], [2.0, 2.0]] of Array(Float64)
       m = Matrix.rows m_rows
 
       m_each_row_result = [] of Array(Float64)
-      m.each_row {|row, index| m_each_row_result.push row }
+      m.each_row { |row, index| m_each_row_result.push row }
 
       m_rows.should eq(m_each_row_result)
 
       # This is to ensure that we're yielding row copies
       m_each_row_result[0][0] = 23.0
-      m[0,0].should eq(1)
+      m[0, 0].should eq(1)
     end
   end
 
@@ -565,12 +581,12 @@ STR
     it "shuffles a Matrix's columns" do
       m = Matrix.columns [[1, 2], [3, 4]]
       m2 = m.shuffle_cols
-      m2.dimensions.should eq({2,2})
+      m2.dimensions.should eq({2, 2})
 
-      cols_were_swapped = m[0,0] == m2[0,1] &&
-                          m[1,0] == m2[1,1] &&
-                          m[0,1] == m2[0,0] &&
-                          m[1,1] == m2[1,0]
+      cols_were_swapped = m[0, 0] == m2[0, 1] &&
+        m[1, 0] == m2[1, 1] &&
+        m[0, 1] == m2[0, 0] &&
+        m[1, 1] == m2[1, 0]
 
       (m == m2 || cols_were_swapped).should be_true
     end
@@ -578,13 +594,13 @@ STR
 
   context "submatrices" do
     m = Matrix.rows [
-      [1,2,3],
-      [4,5,6],
-      [7,8,9]
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9],
     ]
 
     it "returns a submatrix" do
-      m[0..1, 0..1].should eq(Matrix.rows [[1,2], [4,5]])
+      m[0..1, 0..1].should eq(Matrix.rows [[1, 2], [4, 5]])
     end
 
     it "interprets negatives as a count from the end of the dimension" do

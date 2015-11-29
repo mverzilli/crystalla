@@ -267,14 +267,27 @@ module Crystalla
       transposed
     end
 
-    # TODO: maybe S should also be returned as a Matrix.
-    # I guess it'll depend mostly on usage.
     def svd : Tuple(Matrix, Array(Float64), Matrix)
       u = Matrix.zeros(@number_of_rows, @number_of_rows)
       vt = Matrix.zeros(@number_of_cols, @number_of_cols)
       s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
-
       lapack_svd(u, s, vt)
+      return {u, s, vt}
+    end
+
+    def svd(count : Int32) : Tuple(Matrix, Array(Float64), Matrix)
+      ifdef dgesvdx
+        u = Matrix.zeros(@number_of_rows, count)
+        vt = Matrix.zeros(count, @number_of_cols)
+        s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
+        lapack_partial_svd(u, s, vt, count)
+      else
+        u, s, vt = svd
+        u = u[0..-1, 0...count]
+        s = s[0...count]
+        vt = vt[0...count, 0..-1]
+      end
+
       return {u, s, vt}
     end
 
@@ -282,6 +295,16 @@ module Crystalla
       s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
       lapack_svd(nil, s, nil)
       s
+    end
+
+    def singular_values(count : Int32) : Array(Float64)
+      ifdef dgesvdx
+        s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
+        lapack_partial_svd(nil, s, nil, count)
+        return s
+      else
+        singular_values[0...count]
+      end
     end
 
     def [](rows : Range(Int32, Int32), cols : Range(Int32, Int32)) : Matrix
