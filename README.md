@@ -4,7 +4,7 @@
 
 Crystalla is a Numerical Methods library for the Crystal programming language. It binds to LAPACK and looks to Numpy for API and design ideas.
 
-It currently only works on OS X.
+Works on OSX and Ubuntu, using the Accelerate framework and liblapack+libblas respectively.
 
 ## Installation
 
@@ -14,6 +14,11 @@ Add this to your application's `shard.yml`:
 dependencies:
   crystalla:
     github: mverzilli/crystalla
+```
+
+On Ubuntu, you may need to install the following packages:
+```
+liblapack-dev liblapack-doc-man liblapack-doc liblapack-pic liblapack3 liblapack-test liblapack3gf liblapacke liblapacke-dev libblas-dev libblas-doc liblapacke-dev liblapack-doc
 ```
 
 ## Usage
@@ -57,7 +62,17 @@ Matrix[[ -2,  1.5 ],
 
 ## Development
 
-Currently it only supports development and usage on OS X, but it should be almost trivial to support Linux distros.
+Development on OSX works out of the box. To try the library on Ubuntu from OSX, you can use the associated docker image, and run it mounting crystalla. First, build the image:
+```
+docker build -t mverzilli/crystalla .
+```
+
+And fire up a new container by running:
+```
+docker run --rm -it -v `pwd`:/opt/crystalla mverzilli/crystalla
+```
+
+You can run `crystal spec` to check everything is working fine.
 
 ## Contributing
 
