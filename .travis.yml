@@ -1,8 +1,28 @@
 language: crystal
 sudo: false
+dist: trusty
 os:
   - osx
+  - linux
 before_install:
-  - brew update
-  - brew install crystal-lang; brew link --overwrite crystal-lang
-
+  - if [ ${TRAVIS_OS_NAME} == "osx" ]; then
+      brew update;
+      brew install crystal-lang;
+      brew link --overwrite crystal-lang;
+    fi
+addons:
+  apt:
+    packages:
+      - liblapack-dev
+      - liblapack-doc-man
+      - liblapack-doc
+      - liblapack-pic
+      - liblapack3
+      - liblapack-test
+      - liblapack3gf
+      - liblapacke
+      - liblapacke-dev
+      - libblas-dev
+      - libblas-doc
+      - liblapacke-dev
+      - liblapack-doc
