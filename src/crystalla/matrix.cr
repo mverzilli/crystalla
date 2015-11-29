@@ -260,11 +260,11 @@ module Crystalla
     end
 
     def transpose : Matrix
-      rows = [] of Array(Float64)
-      @values.each_slice(number_of_rows) do |col|
-        rows.push col
+      transposed = Matrix.new(Array.new(@values.size, 0.0), @number_of_cols, @number_of_rows)
+      each_by_col do |val, i, j|
+        transposed[j, i] = val
       end
-      Matrix.rows rows
+      transposed
     end
 
     # TODO: maybe S should also be returned as a Matrix.

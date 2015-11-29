@@ -101,7 +101,13 @@ module Crystalla
     end
 
     def self.repeat_row(row : Array(Number), times : Int32) : Crystalla::Matrix
-      repeat_column(row, times).transpose
+      m = Crystalla::Matrix.new(Array.new(row.size * times, 0.0), times, row.size)
+      times.times do |i|
+        row.each_with_index do |value, j|
+          m[i, j] = value
+        end
+      end
+      return m
     end
 
     def self.repeat_column(column : Array(Number), times : Int32) : Crystalla::Matrix
