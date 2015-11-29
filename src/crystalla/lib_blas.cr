@@ -1,5 +1,9 @@
 module Crystalla
-  @[Link(framework: "Accelerate")]
+  ifdef darwin
+    @[Link(framework: "Accelerate")]
+  else
+    @[Link("blas")]
+  end
   lib LibBlas
     enum Order
       RowMajor = 101

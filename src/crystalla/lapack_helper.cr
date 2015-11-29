@@ -9,7 +9,7 @@ module Crystalla::LapackHelper
       ld_ptr,                     # lda
       pivot_indices_array,        # ipiv
       pointerof(info)             # info
-)
+    )
 
     # TODO: handle specific error codes
     if info != 0
@@ -22,7 +22,7 @@ module Crystalla::LapackHelper
     workspace = Slice.new(workspace_length, 0.0)
     info = 0
 
-    LibLapack.dgetri_(
+    LibLapack.dgetri(
       pointerof(@number_of_rows),  # n
       self,                        # a
       ld_ptr,                      # lda
@@ -30,7 +30,7 @@ module Crystalla::LapackHelper
       workspace,                   # work
       pointerof(workspace_length), # lwork
       pointerof(info)              # info
-)
+    )
 
     raise "sgetri_ returned an error!" if info != 0
   end
@@ -49,7 +49,7 @@ module Crystalla::LapackHelper
       b,                            # b
       pointerof(ldb),               # ldb
       pointerof(info)               # info
-)
+    )
 
     raise "Solve failed: code #{info}" if info != 0
   end
