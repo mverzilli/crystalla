@@ -1,4 +1,5 @@
 language: crystal
+sudo: false
 os:
   - osx
 before_install:
