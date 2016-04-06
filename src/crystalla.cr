@@ -2,9 +2,9 @@ require "./crystalla/*"
 
 module Crystalla
   def self.lapack_version
-    major :: Int32
-    minor :: Int32
-    patch :: Int32
+    major = 0
+    minor = 0
+    patch = 0
     LibLapack.ilaver(pointerof(major), pointerof(minor), pointerof(patch))
     {major, minor, patch}
   end

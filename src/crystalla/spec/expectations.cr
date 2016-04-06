@@ -9,12 +9,12 @@ module Crystalla
         @m.all_close(other, @absolute_tolerance, @relative_tolerance)
       end
 
-      def failure_message
-        "expected:\n#{@m.inspect}\n\ngot:\n#{@target.inspect}"
+      def failure_message(m)
+        "expected:\n#{m.inspect}\n\ngot:\n#{@target.inspect}"
       end
 
-      def negative_failure_message
-        "expected not:\n#{@m.inspect}\n\ngot:\n#{@target.inspect}"
+      def negative_failure_message(m)
+        "expected not:\n#{m.inspect}\n\ngot:\n#{@target.inspect}"
       end
     end
 
