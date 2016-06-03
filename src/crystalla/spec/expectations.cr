@@ -1,7 +1,9 @@
 module Crystalla
   module Spec
     class AllCloseExpectation(T)
-      def initialize(@m : T, @absolute_tolerance, @relative_tolerance)
+      @target : Matrix | Array(Float64) | Nil
+
+      def initialize(@m : T, @absolute_tolerance : Float64?, @relative_tolerance : Float64?)
       end
 
       def match(other)

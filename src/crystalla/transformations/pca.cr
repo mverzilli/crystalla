@@ -13,7 +13,14 @@ module Crystalla
 
   module Transformations
     class PCA
-      getter :n_components, :mean_by_feature
+      getter n_components
+      getter mean_by_feature : Array(Float64)
+      @u : Matrix
+      @s : Array(Float64)
+      @vt : Matrix
+      @u_components : Matrix?
+      @s_values : Array(Float64)?
+      @vt_components : Matrix?
 
       # Initializes a new PCA object with the model to fit and the number of components to use
       # The model should be a n_samples * n_features matrix
