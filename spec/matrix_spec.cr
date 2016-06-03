@@ -509,8 +509,8 @@ describe Matrix do
         [3, 4],
       ].to_s.should eq(
         <<-STR
-Matrix[[ 1, 2 ],
-       [ 3, 4 ]]
+Matrix[[ 1.0, 2.0 ],
+       [ 3.0, 4.0 ]]
 STR
       )
     end
@@ -521,8 +521,8 @@ STR
         [3, 40],
       ].to_s.should eq(
         <<-STR
-Matrix[[ 10,  2 ],
-       [  3, 40 ]]
+Matrix[[ 10.0,  2.0 ],
+       [  3.0, 40.0 ]]
 STR
       )
     end
@@ -545,7 +545,7 @@ STR
         [0.1, 0.2],
       ].to_s.should eq(
         <<-STR
-Matrix[[ 1  , 2   ],
+Matrix[[ 1.0, 2.0 ],
        [ 0.1, 0.2 ]]
 STR
       )
