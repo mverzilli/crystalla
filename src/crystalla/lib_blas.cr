@@ -1,9 +1,9 @@
 module Crystalla
-  ifdef darwin
+  {% if flag?(:darwin) %}
     @[Link(framework: "Accelerate")]
-  else
+  {% else %}
     @[Link("blas")]
-  end
+  {% end %}
   lib LibBlas
     enum Order
       RowMajor = 101

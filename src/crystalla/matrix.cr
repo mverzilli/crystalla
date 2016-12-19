@@ -276,17 +276,17 @@ module Crystalla
     end
 
     def svd(count : Int32) : Tuple(Matrix, Array(Float64), Matrix)
-      ifdef dgesvdx
-        u = Matrix.zeros(@number_of_rows, count)
-        vt = Matrix.zeros(count, @number_of_cols)
-        s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
-        lapack_partial_svd(u, s, vt, count)
-      else
+      #{% if flag?(:dgesvdx) %}
+      #  u = Matrix.zeros(@number_of_rows, count)
+      #  vt = Matrix.zeros(count, @number_of_cols)
+      #  s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
+      #  lapack_partial_svd(u, s, vt, count)
+      #{% else %}
         u, s, vt = svd
         u = u[0..-1, 0...count]
         s = s[0...count]
         vt = vt[0...count, 0..-1]
-      end
+      #{% end %}
 
       return {u, s, vt}
     end
@@ -298,13 +298,13 @@ module Crystalla
     end
 
     def singular_values(count : Int32) : Array(Float64)
-      ifdef dgesvdx
+      {% if flag?(:dgesvdx) %}
         s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
         lapack_partial_svd(nil, s, nil, count)
         return s
-      else
+      {% else %}
         singular_values[0...count]
-      end
+      {% end %}
     end
 
     def [](rows : Range(Int32, Int32), cols : Range(Int32, Int32)) : Matrix
