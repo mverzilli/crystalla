@@ -37,12 +37,12 @@ module Crystalla
       Matrix.new values.map(&.-), @number_of_rows, @number_of_cols
     end
 
-    def *(other : self) : Matrix
+    def * (other : self) : Matrix
       if number_of_cols != other.number_of_rows
         raise ArgumentError.new "number of rows/columns mismatch in matrix multiplication"
       end
 
-      blas_multiply other
+      blas_multiply_matrix other
     end
 
     def prepend(row : Matrix) : Matrix

@@ -151,7 +151,16 @@ module Crystalla::LapackHelper
   end
 
   def ld
-    number_of_rows
+    self.number_of_rows
+  end
+
+  def ld_array
+    rows = self.shape[0]
+    if rows == 0
+      return self.shape[1]
+    else
+      return self.shape[0]
+    end
   end
 
   def ld_ptr
