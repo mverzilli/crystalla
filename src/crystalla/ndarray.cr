@@ -60,18 +60,23 @@ module Crystalla
       end
     end
 
+    def broadcast(number) : Ndarray
+      number = number.to_f64
+      if shape[0] != 0
+        other = Ndarray.tile(Array.new(@shape[1], number), @shape[0])
+      else
+        other = Ndarray.new(Array.new(@shape[1], number))
+      end
+      return other
+    end
+
     def +(other : self) : Ndarray
       zip_with(other) { |x, y| x + y }
     end
 
     # brodcasting for addition
     def +(number : Number) : Ndarray
-      number = number.to_f64
-      if shape[0] != 0
-        other = Ndarray.tile(Array.new(@shape[1], number), @shape[0].to_i32)
-      else
-        other = Ndarray.new(Array.new(@shape[1], number))
-      end
+      other = broadcast(number)
       zip_with(other) { |x, y| x + y }
     end
 
@@ -82,12 +87,7 @@ module Crystalla
 
     # broadcasting for multiplication
     def *(number : Number) : Ndarray
-      number = number.to_f64
-      if shape[0] != 0
-        other = Ndarray.tile(Array.new(@shape[1], number), @shape[0].to_i32)
-      else
-        other = Ndarray.new(Array.new(@shape[1], number))
-      end
+      other = broadcast(number)
       zip_with(other) { |x, y| x * y }
     end
 
@@ -98,12 +98,7 @@ module Crystalla
 
     # broadcasting for substracion
     def -(number : Number) : Ndarray
-      number = number.to_f64
-      if shape[0] != 0
-        other = Ndarray.tile(Array.new(@shape[1], number), @shape[0].to_i32)
-      else
-        other = Ndarray.new(Array.new(@shape[1], number))
-      end
+      other = broadcast(number)
       zip_with(other) { |x, y| x - y }
     end
 
@@ -113,12 +108,7 @@ module Crystalla
 
     # broadcasting for division
     def /(number : Number) : Ndarray
-      number = number.to_f64
-      if shape[0] != 0
-        other = Ndarray.tile(Array.new(@shape[1], number), @shape[0].to_i32)
-      else
-        other = Ndarray.new(Array.new(@shape[1], number))
-      end
+      other = broadcast(number)
       zip_with(other) { |x, y| x / y }
     end
 
