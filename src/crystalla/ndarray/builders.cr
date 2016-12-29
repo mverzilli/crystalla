@@ -14,9 +14,7 @@ module Crystalla
 
     def self.constant_array(value : Number, number_of_rows : Int32, number_of_cols : Int32) : Ndarray
       validate_dimensions(number_of_rows, number_of_cols)
-      arr = Ndarray.new(Array.new(number_of_rows * number_of_cols, value))
-      arr.shape = {number_of_rows,number_of_cols}
-      return arr
+      Ndarray.new(Array.new(number_of_rows * number_of_cols, value), {number_of_rows, number_of_cols})
     end
 
     def self.eye(number_of_rows_and_cols : Int32) : Ndarray
@@ -31,9 +29,7 @@ module Crystalla
         values[number_of_rows * i + i] = 1.0
       end
 
-      arr = Ndarray.new(values)
-      arr.shape = {number_of_rows, number_of_cols}
-      return arr
+      Ndarray.new(values, {number_of_rows, number_of_cols})
     end
 
     def self.tile(vector : Array, count : Int32)
@@ -53,9 +49,7 @@ module Crystalla
         values[i] = r.next_float
       end
 
-      arr = Ndarray.new(values)
-      arr.shape = {number_of_rows, number_of_cols}
-      return arr
+      Ndarray.new(values, {number_of_rows, number_of_cols})
     end
 
     def self.rand(number_of_rows : Int32, number_of_cols : Int32, range : Range(Int32, Int32)) : Ndarray
@@ -67,9 +61,7 @@ module Crystalla
         values[i] = r.rand(range).to_f
       end
 
-      arr = Ndarray.new(values)
-      arr.shape = {number_of_rows, number_of_cols}
-      return arr
+      Ndarray.new(values, {number_of_rows, number_of_cols})
     end
 
   end

@@ -23,8 +23,9 @@ module Crystalla
     @shape : Tuple(Int32, Int32)
     @values : Array(Float64)
 
-    def initialize(values)
-      @shape = set_shape(values)
+    def initialize(values, shape = {0,0})
+      @shape = shape
+      @shape = set_shape(values) unless shape != {0,0}
       @values = set_values(values)
       #TODO
       #@dtype = set_type(values)
@@ -113,17 +114,13 @@ module Crystalla
     end
 
     def - : Ndarray
-      arr = Ndarray.new(values.map(&.-))
-      arr.shape = @shape
-      return arr
+      Ndarray.new(values.map(&.-), @shape)
     end
 
     # element wise square root
     def sqrt
       result = self.values.map{|v| Math.sqrt(v)}
-      arr = Ndarray.new(result)
-      arr.shape = shape
-      return arr
+      Ndarray.new(result, shape)
     end
 
     def zip_with(other) : Ndarray
@@ -134,15 +131,12 @@ module Crystalla
         (1...self.shape[0]).each do |i|
           self_values += self.values
         end
-        expand_self = Ndarray.new(self_values)
-        expand_self.shape = {shape[0], other.shape[1]}
+        expand_self = Ndarray.new(self_values, {shape[0], other.shape[1]})
         new_values = Array.new(expand_self.values.size, 0.0)
         expand_self.each do |i, x|
           new_values[i] = yield x, other.values[i]
         end
-        arr = Ndarray.new(new_values)
-        arr.shape = expand_self.shape
-        return arr
+        return Ndarray.new(new_values, expand_self.shape)
 
       # expand rows
       elsif shape[0] != other.shape[0] && (other.shape[0] == 1 || other.shape[0] == 0)
@@ -158,8 +152,7 @@ module Crystalla
         (0..other.shape[0]).each do |i|
           other_values += other.values
         end
-        other = Ndarray.new(other_values)
-        other.shape = {shape[0], shape[1]}
+        other = Ndarray.new(other_values, {shape[0], shape[1]})
       elsif shape[1] != other.shape[1]
         raise ArgumentError.new "number of columns mismatch in array operation"
       end
@@ -168,9 +161,7 @@ module Crystalla
       self.each do |i, x|
         new_values[i] = yield x, other.values[i]
       end
-      arr = Ndarray.new(new_values)
-      arr.shape = shape
-      return arr
+      Ndarray.new(new_values, shape)
     end
 
     # sum elements of the whole array, or following an axis
@@ -267,9 +258,7 @@ module Crystalla
 
     private def bool_comparison(num)
       res = self.values.map{|v| yield v, num}
-      arr = Ndarray.new(res)
-      arr.shape = {shape[0], shape[1]}
-      return arr
+      arr = Ndarray.new(res, shape)
     end
 
     def ==(other : Ndarray) : Bool
@@ -338,9 +327,7 @@ module Crystalla
     end
 
     def clone : Ndarray
-      arr = Ndarray.new(@values.clone)
-      arr.shape = @shape
-      return arr
+      arr = Ndarray.new(@values.clone, @shape)
     end
 
     def square? : Bool
