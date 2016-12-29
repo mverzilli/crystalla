@@ -1,4 +1,8 @@
-language: crystal
-script:
-  - crystal spec
-  - crystal tool format --check
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker build -t mverzilli/crystalla .
+  - docker run mverzilli/crystal /bin/sh -c "crystal spec"
