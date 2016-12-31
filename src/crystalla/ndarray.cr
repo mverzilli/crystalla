@@ -123,6 +123,11 @@ module Crystalla
       Ndarray.new(result, shape)
     end
 
+    def exp
+      result = self.values.map{|v| Math.exp(v)}
+      Ndarray.new(result, shape)
+    end
+
     def zip_with(other) : Ndarray
       # expand rows & columns
       if shape[1] == 1 && (other.shape[0] == 1 || other.shape[0] == 0)
@@ -171,10 +176,11 @@ module Crystalla
       elsif axis == 0
         arr = self.values.in_groups_of(shape[1])
         sum = arr.map{|v| v.compact.sum(0.0)}.flatten
+        Ndarray.new(sum)
       elsif axis == 1
         sum = [] of Float64
         self.each_row{|r| sum << r.sum}
-        return sum
+        Ndarray.new(sum)
       else
         raise ArgumentError.new "Axis provided must be 0(columns) or 1(rows)"
       end
@@ -213,6 +219,10 @@ module Crystalla
 
     def []=(row : Int32, col : Int32, value : Number)
       values[row_col_to_index(row, col)] = value.to_f64
+    end
+
+    def []=(index : Int32, value : Number)
+      values[index] = value.to_f64
     end
 
     def slice(rows : Tuple(Int32, Int32), cols : Tuple(Int32, Int32))

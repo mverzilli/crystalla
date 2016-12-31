@@ -4,8 +4,16 @@ module Crystalla
       self.constant_array(0.0, number_of_rows, number_of_cols)
     end
 
+    def self.zeros(number_of_elements : Int32) : Ndarray
+      Ndarray.new(Array.new(number_of_elements, 0.0), {0, number_of_elements})
+    end
+
     def self.ones(number_of_rows : Int32, number_of_cols : Int32) : Ndarray
       self.constant_array(1.0, number_of_rows, number_of_cols)
+    end
+
+    def self.ones(number_of_elements : Int32) : Ndarray
+      Ndarray.new(Array.new(number_of_elements, 1.0), {0, number_of_elements})
     end
 
     def self.full(number_of_rows : Int32, number_of_cols : Int32, value : Number) : Ndarray

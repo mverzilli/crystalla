@@ -150,6 +150,7 @@ module Crystalla::LapackHelper
     raise "SVD failed: code #{info}" if info != 0
   end
 
+
   def ld
     self.number_of_rows
   end

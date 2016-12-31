@@ -1,5 +1,5 @@
 require "./crystalla/*"
-require "benchmark"
+
 module Crystalla
   def self.lapack_version
     major = 0
