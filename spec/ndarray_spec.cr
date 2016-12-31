@@ -589,11 +589,11 @@ describe Ndarray do
       end
 
       it "column wise sum" do
-        m.sum(0).should eq([4,6])
+        m.sum(0).should eq(Ndarray.new([4,6]))
       end
 
       it "row wise sum" do
-        m.sum(1).should eq([3,7])
+        m.sum(1).should eq(Ndarray.new([3,7]))
       end
   end
 
@@ -657,6 +657,13 @@ describe Ndarray do
                                          [  5.0,   6.0,   7.0]]))
 
       end
+  end
+
+  context "exp" do
+     it "element wise exponential" do
+       m1 = Ndarray.new([1,2,3])
+       m1.exp.should eq(Ndarray.new([Math.exp(1), Math.exp(2), Math.exp(3)]))
+     end
   end
 end
 
