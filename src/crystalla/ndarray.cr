@@ -1,6 +1,6 @@
 require "./ndarray/builders"
 require "./transformations/pca"
-
+require "./utils/random_gaussian"
 
 module Crystalla
 
@@ -204,13 +204,24 @@ module Crystalla
         return self.transpose
       else
         @shape = {number_of_rows, number_of_cols}
+        return self
       end
-      return self
+    end
+
+    def concatenate(other : Ndarray, axis = 0) : Ndarray
+      if axis == 0
+        self.add_rows(shape[0], other)
+      else
+        Ndarray.new(self.values + other.values, {shape[0], shape[1] + other.shape[1]})
+      end
     end
 
     def [](index)
-      raise ArgumentError.new("A row number an column number should be provided") if shape[0] != 0
-      values[index]
+      row = [] of Float64
+      (0...@shape[1]).each do |j|
+        row.push self[index, j]
+      end
+      return row
     end
 
     def [](row, col) : Float64

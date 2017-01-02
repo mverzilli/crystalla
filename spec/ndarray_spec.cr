@@ -65,7 +65,7 @@ describe Ndarray do
     it "creates a row vector given an array" do
       m = Ndarray.new [3, 2, 1]
       m.shape.should eq({0, 3})
-      [3, 2, 1].each_with_index { |val, index| val.should eq m[index] }
+
     end
 
 
@@ -664,6 +664,15 @@ describe Ndarray do
        m1 = Ndarray.new([1,2,3])
        m1.exp.should eq(Ndarray.new([Math.exp(1), Math.exp(2), Math.exp(3)]))
      end
+  end
+
+  context "concatenate" do
+      it "concatenate two arrays" do
+         a = Ndarray.new([[1, 2], [3, 4]])
+         b = Ndarray.new([[5, 6]])
+         a.concatenate(b, 0).should eq(Ndarray.new([[1, 2],[3, 4],[5, 6]]))
+         a.concatenate(b.transpose, 1).should eq(Ndarray.new([[1, 2, 5],[3, 4, 6]]))
+      end
   end
 end
 
