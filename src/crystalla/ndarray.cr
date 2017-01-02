@@ -1,6 +1,7 @@
 require "./ndarray/builders"
 require "./transformations/pca"
 require "./utils/random_gaussian"
+require "./ndarray/functions"
 
 module Crystalla
 
@@ -117,15 +118,9 @@ module Crystalla
       Ndarray.new(values.map(&.-), @shape)
     end
 
-    # element wise square root
-    def sqrt
-      result = self.values.map{|v| Math.sqrt(v)}
-      Ndarray.new(result, shape)
-    end
-
-    def exp
-      result = self.values.map{|v| Math.exp(v)}
-      Ndarray.new(result, shape)
+    def **(number : Number) : Ndarray
+      other = broadcast(number)
+      zip_with(other) { |x, y| x ** y }
     end
 
     def zip_with(other) : Ndarray

@@ -674,6 +674,14 @@ describe Ndarray do
          a.concatenate(b.transpose, 1).should eq(Ndarray.new([[1, 2, 5],[3, 4, 6]]))
       end
   end
+
+  context "sigmoid" do
+      it "computes element wise sigmoid" do
+         a = Ndarray.new([[1,2], [3,4]])
+         a.sigmoid.should eq(Ndarray.new([[ 0.7310585786300049 , 0.88079707797788231 ],
+                                          [ 0.95257412682243336, 0.98201379003790845 ]]))
+      end
+  end
 end
 
 
