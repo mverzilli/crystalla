@@ -4,5 +4,5 @@ services:
   - docker
 
 before_install:
-  - docker build -t mverzilli/crystalla .
+  - docker build https://github.com/mverzilli/crystalla.git
   - docker run mverzilli/crystal /bin/sh -c "crystal spec"
