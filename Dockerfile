@@ -1,4 +1,4 @@
-FROM manastech/crystal
+FROM crystallang/crystal
 
 RUN apt-get update && \
     apt-get install -y liblapack-dev liblapack-doc-man liblapack-doc liblapack-pic liblapack3 liblapack-test liblapack3gf liblapacke liblapacke-dev libblas-dev libblas-doc liblapacke-dev liblapack-doc && \
