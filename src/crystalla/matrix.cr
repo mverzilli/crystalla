@@ -276,17 +276,18 @@ module Crystalla
     end
 
     def svd(count : Int32) : Tuple(Matrix, Array(Float64), Matrix)
-      #{% if flag?(:dgesvdx) %}
-      #  u = Matrix.zeros(@number_of_rows, count)
-      #  vt = Matrix.zeros(count, @number_of_cols)
-      #  s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
-      #  lapack_partial_svd(u, s, vt, count)
-      #{% else %}
+      u = Matrix.zeros(@number_of_rows, count)
+      vt = Matrix.zeros(count, @number_of_cols)
+      s = Array.new([@number_of_rows, @number_of_cols].min, 0.0)
+
+      {% if flag?(:dgesvdx) %}        
+        lapack_partial_svd(u, s, vt, count)
+      {% else %}
         u, s, vt = svd
         u = u[0..-1, 0...count]
         s = s[0...count]
         vt = vt[0...count, 0..-1]
-      #{% end %}
+      {% end %}
 
       return {u, s, vt}
     end
