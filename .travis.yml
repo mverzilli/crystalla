@@ -6,7 +6,6 @@ before_install:
   - sudo apt-get update 
   - sudo apt-get install -y liblapack-dev 
   - sudo apt-get install -y liblapack-pic
-  - sudo apt-get install -y liblapack3
   - sudo apt-get install -y liblapack-test
   - sudo apt-get install -y liblapack3gf
   - sudo apt-get install -y liblapacke
