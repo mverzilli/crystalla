@@ -1,6 +1,6 @@
 # Crystalla
 
-[![Build Status](https://travis-ci.org/mverzilli/crystalla.svg?branch=master)](https://travis-ci.org/mverzilli/crystalla)
+![Build status](https://circleci.com/gh/mverzilli/crystalla.svg?style=shield&circle-token=:circle-token)
 
 Crystalla is a Numerical Methods library for the Crystal programming language. It binds to LAPACK and looks to Numpy for API and design ideas.
 
