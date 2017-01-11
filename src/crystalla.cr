@@ -1,4 +1,5 @@
 require "./crystalla/*"
+require "./crystalla/utils/samples_generator"
 
 module Crystalla
   def self.lapack_version
