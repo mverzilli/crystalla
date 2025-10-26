@@ -76,7 +76,7 @@ describe Matrix do
 
     it "creates a row vector containing a random permutation of the integers from 0 to n exclusive" do
       m = Matrix.rand_perm(3)
-      m.dimensions.should eq ({1, 3})
+      m.dimensions.should eq({1, 3})
       [0, 1, 2].permutations(3).map { |p| Matrix.row_vector(p) }.any?(&.==(m)).should be_true
     end
 
@@ -584,9 +584,9 @@ STR
       m2.dimensions.should eq({2, 2})
 
       cols_were_swapped = m[0, 0] == m2[0, 1] &&
-        m[1, 0] == m2[1, 1] &&
-        m[0, 1] == m2[0, 0] &&
-        m[1, 1] == m2[1, 0]
+                          m[1, 0] == m2[1, 1] &&
+                          m[0, 1] == m2[0, 0] &&
+                          m[1, 1] == m2[1, 0]
 
       (m == m2 || cols_were_swapped).should be_true
     end
@@ -615,6 +615,381 @@ STR
 
     it "doesn't raise if upper bound is exclusive" do
       m[0...3, 0...3].should eq(m)
+    end
+  end
+
+  context "edge cases" do
+    it "handles empty matrix creation" do
+      m = Matrix.empty
+      m.dimensions.should eq({0, 0})
+      m.values.size.should eq(0)
+    end
+
+    it "creates a matrix with zero rows" do
+      m = Matrix.zeros(0, 3)
+      m.dimensions.should eq({0, 3})
+      m.values.size.should eq(0)
+    end
+
+    it "creates a matrix with zero columns" do
+      m = Matrix.zeros(3, 0)
+      m.dimensions.should eq({3, 0})
+      m.values.size.should eq(0)
+    end
+
+    it "handles single element matrix creation" do
+      m = Matrix.rows [[42.0]]
+      m.dimensions.should eq({1, 1})
+      m[0, 0].should eq(42.0)
+    end
+
+    it "handles single element matrix operations" do
+      m1 = Matrix.rows [[2.0]]
+      m2 = Matrix.rows [[3.0]]
+      (m1 + m2).should eq(Matrix.rows [[5.0]])
+      (m1 * m2).should eq(Matrix.rows [[6.0]])
+      (m1 - m2).should eq(Matrix.rows [[-1.0]])
+    end
+
+    it "creates column vector" do
+      m = Matrix.columns [[1.0, 2.0, 3.0]]
+      m.dimensions.should eq({3, 1})
+      m.row_vector?.should be_false
+    end
+
+    it "handles large matrix creation" do
+      m = Matrix.zeros(100, 100)
+      m.dimensions.should eq({100, 100})
+      m.values.size.should eq(10000)
+      m[50, 50].should eq(0.0)
+    end
+
+    it "clones empty matrix" do
+      m = Matrix.empty
+      m2 = m.clone
+      m.should eq(m2)
+    end
+
+    it "transposes single element matrix" do
+      m = Matrix.rows [[42.0]]
+      m.transpose.should eq(m)
+    end
+
+    it "transposes column vector to row vector" do
+      m = Matrix.columns [[1.0, 2.0, 3.0]]
+      t = m.transpose
+      t.dimensions.should eq({1, 3})
+      t.row_vector?.should be_true
+    end
+
+    it "negates empty matrix" do
+      m = Matrix.empty
+      (-m).should eq(m)
+    end
+  end
+
+  context "iterators" do
+    it "iterates over each column" do
+      m = Matrix.rows [[1.0, 2.0], [3.0, 4.0]]
+      cols = [] of Array(Float64)
+      m.each_col { |col, index| cols.push col }
+
+      cols.size.should eq(2)
+      cols[0].should eq([1.0, 3.0])
+      cols[1].should eq([2.0, 4.0])
+    end
+
+    it "iterates over each column with correct indices" do
+      m = Matrix.rows [[1.0, 2.0, 3.0]]
+      indices = [] of Int32
+      m.each_col { |col, index| indices.push index }
+
+      indices.should eq([0, 1, 2])
+    end
+
+    it "yields column copies in each_col" do
+      m = Matrix.rows [[1.0, 2.0], [3.0, 4.0]]
+      m.each_col do |col, index|
+        col[0] = 999.0
+      end
+
+      m[0, 0].should eq(1.0)
+      m[1, 0].should eq(3.0)
+    end
+
+    it "iterates by row order" do
+      m = Matrix.rows [[1.0, 2.0], [3.0, 4.0]]
+      values = [] of Float64
+      m.each_by_row { |val, i, j| values.push val }
+
+      values.should eq([1.0, 2.0, 3.0, 4.0])
+    end
+
+    it "iterates by column order" do
+      m = Matrix.rows [[1.0, 2.0], [3.0, 4.0]]
+      values = [] of Float64
+      m.each_by_col { |val, i, j| values.push val }
+
+      values.should eq([1.0, 3.0, 2.0, 4.0])
+    end
+
+    it "provides correct indices in each_by_row" do
+      m = Matrix.rows [[1.0, 2.0], [3.0, 4.0]]
+      positions = [] of Tuple(Int32, Int32)
+      m.each_by_row { |val, i, j| positions.push({i, j}) }
+
+      positions.should eq([{0, 0}, {0, 1}, {1, 0}, {1, 1}])
+    end
+
+    it "provides correct indices in each_by_col" do
+      m = Matrix.rows [[1.0, 2.0], [3.0, 4.0]]
+      positions = [] of Tuple(Int32, Int32)
+      m.each_by_col { |val, i, j| positions.push({i, j}) }
+
+      positions.should eq([{0, 0}, {1, 0}, {0, 1}, {1, 1}])
+    end
+
+    it "handles iteration over single element matrix" do
+      m = Matrix.rows [[42.0]]
+      count = 0
+      m.each_by_row { |val, i, j| count += 1 }
+      count.should eq(1)
+    end
+
+    it "handles iteration over empty matrix" do
+      m = Matrix.empty
+      count = 0
+      m.each_row { |row, index| count += 1 }
+      count.should eq(0)
+    end
+  end
+
+  context "element assignment" do
+    it "assigns to first element" do
+      m = Matrix.zeros(2, 2)
+      m[0, 0] = 42.0
+      m[0, 0].should eq(42.0)
+      m[0, 1].should eq(0.0)
+    end
+
+    it "assigns to last element" do
+      m = Matrix.zeros(3, 3)
+      m[2, 2] = 99.0
+      m[2, 2].should eq(99.0)
+    end
+
+    it "assigns integer values" do
+      m = Matrix.zeros(2, 2)
+      m[0, 0] = 5
+      m[0, 0].should eq(5.0)
+    end
+
+    it "preserves other values during assignment" do
+      m = Matrix.ones(3, 3)
+      m[1, 1] = 5.0
+      m[0, 0].should eq(1.0)
+      m[1, 1].should eq(5.0)
+      m[2, 2].should eq(1.0)
+    end
+
+    it "assigns multiple values" do
+      m = Matrix.zeros(2, 2)
+      m[0, 0] = 1.0
+      m[0, 1] = 2.0
+      m[1, 0] = 3.0
+      m[1, 1] = 4.0
+      m.should eq(Matrix.rows [[1.0, 2.0], [3.0, 4.0]])
+    end
+  end
+
+  context "stats edge cases" do
+    it "calculates mean of single element matrix" do
+      m = Matrix.rows [[42.0]]
+      m.mean.should eq(42.0)
+    end
+
+    it "calculates mean_by_row for single row" do
+      m = Matrix.rows [[1.0, 2.0, 3.0]]
+      m.mean_by_row.should eq([2.0])
+    end
+
+    it "calculates mean_by_col for single column" do
+      m = Matrix.columns [[1.0, 2.0, 3.0]]
+      m.mean_by_col.should eq([2.0])
+    end
+
+    it "calculates mean_by_row for single element per row" do
+      m = Matrix.columns [[1.0, 2.0, 3.0]]
+      m.mean_by_row.should eq([1.0, 2.0, 3.0])
+    end
+
+    it "calculates mean_by_col for single element per column" do
+      m = Matrix.rows [[1.0, 2.0, 3.0]]
+      m.mean_by_col.should eq([1.0, 2.0, 3.0])
+    end
+
+    it "handles mean with negative values" do
+      m = Matrix.rows [[-1.0, -2.0], [-3.0, -4.0]]
+      m.mean.should eq(-2.5)
+    end
+
+    it "handles mean with mixed positive and negative" do
+      m = Matrix.rows [[1.0, -1.0], [2.0, -2.0]]
+      m.mean.should eq(0.0)
+    end
+  end
+
+  context "builder edge cases" do
+    it "creates constant matrix with specific value" do
+      m = Matrix.constant_matrix(7.5, 2, 3)
+      m.dimensions.should eq({2, 3})
+      m.values.each { |v| v.should eq(7.5) }
+    end
+
+    it "creates constant matrix with negative value" do
+      m = Matrix.constant_matrix(-3.0, 2, 2)
+      m.values.each { |v| v.should eq(-3.0) }
+    end
+
+    it "repeats row once" do
+      m = Matrix.repeat_row([1.0, 2.0], 1)
+      m.should eq(Matrix.rows [[1.0, 2.0]])
+    end
+
+    it "repeats column once" do
+      m = Matrix.repeat_column([1.0, 2.0], 1)
+      m.should eq(Matrix.columns [[1.0, 2.0]])
+    end
+
+    it "repeats single element row" do
+      m = Matrix.repeat_row([5.0], 3)
+      m.should eq(Matrix.rows [[5.0], [5.0], [5.0]])
+    end
+
+    it "repeats single element column" do
+      m = Matrix.repeat_column([5.0], 3)
+      m.should eq(Matrix.rows [[5.0, 5.0, 5.0]])
+    end
+
+    it "raises on rand_perm with zero" do
+      expect_raises ArgumentError, "rand_perm given size must be greater than 0" do
+        Matrix.rand_perm(0)
+      end
+    end
+
+    it "raises on rand_perm with negative" do
+      expect_raises ArgumentError, "rand_perm given size must be greater than 0" do
+        Matrix.rand_perm(-1)
+      end
+    end
+
+    it "creates rand_perm with size 1" do
+      m = Matrix.rand_perm(1)
+      m.dimensions.should eq({1, 1})
+      m[0, 0].should eq(0.0)
+    end
+
+    it "creates diagonal matrix with single element" do
+      m = Matrix.diag([5.0])
+      m.should eq(Matrix.rows [[5.0]])
+    end
+
+    it "creates eye matrix with size 1" do
+      m = Matrix.eye(1)
+      m.should eq(Matrix.rows [[1.0]])
+    end
+
+    it "creates row vector from empty array" do
+      m = Matrix.row_vector([] of Float64)
+      m.dimensions.should eq({1, 0})
+    end
+
+    it "creates matrix from columns with single element" do
+      m = Matrix.columns [[1.0]]
+      m.dimensions.should eq({1, 1})
+      m[0, 0].should eq(1.0)
+    end
+  end
+
+  context "chained operations" do
+    it "chains addition and subtraction" do
+      m1 = Matrix.rows [[1.0, 2.0]]
+      m2 = Matrix.rows [[3.0, 4.0]]
+      m3 = Matrix.rows [[1.0, 1.0]]
+      result = m1 + m2 - m3
+      result.should eq(Matrix.rows [[3.0, 5.0]])
+    end
+
+    it "chains transpose operations" do
+      m = Matrix.rows [[1.0, 2.0], [3.0, 4.0]]
+      m.transpose.transpose.should eq(m)
+    end
+
+    it "chains negation" do
+      m = Matrix.rows [[1.0, -2.0]]
+      (-(-m)).should eq(m)
+    end
+
+    it "applies operations after clone" do
+      m = Matrix.rows [[1.0, 2.0]]
+      m2 = m.clone
+      m2_result = -m2
+      m2_result.should eq(Matrix.rows [[-1.0, -2.0]])
+      m.should eq(Matrix.rows [[1.0, 2.0]])
+    end
+  end
+
+  context "additional comparison tests" do
+    it "compares matrices with different types" do
+      m1 = Matrix.rows [[1.0, 2.0]]
+      m2 = Matrix.rows [[1, 2]]
+      m1.should eq(m2)
+    end
+
+    it "handles all_close with zero tolerance" do
+      m1 = Matrix.rows [[1.0]]
+      m2 = Matrix.rows [[1.0]]
+      m1.all_close(m2, 0.0, 0.0).should be_true
+    end
+
+    it "detects difference with all_close and zero tolerance" do
+      m1 = Matrix.rows [[1.0]]
+      m2 = Matrix.rows [[1.0001]]
+      m1.all_close(m2, 0.0, 0.0).should be_false
+    end
+
+    it "handles comparison of empty matrices" do
+      m1 = Matrix.empty
+      m2 = Matrix.empty
+      m1.should eq(m2)
+      m1.all_close(m2).should be_true
+    end
+  end
+
+  context "square matrix operations" do
+    it "identifies square matrix" do
+      m = Matrix.zeros(3, 3)
+      m.square?.should be_true
+    end
+
+    it "identifies non-square matrix" do
+      m = Matrix.zeros(2, 3)
+      m.square?.should be_false
+    end
+
+    it "identifies single element as square" do
+      m = Matrix.rows [[1.0]]
+      m.square?.should be_true
+    end
+
+    it "computes trace of identity matrix" do
+      m = Matrix.eye(5)
+      m.trace.should eq(5.0)
+    end
+
+    it "computes trace of single element" do
+      m = Matrix.rows [[42.0]]
+      m.trace.should eq(42.0)
     end
   end
 end
